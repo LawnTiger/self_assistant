@@ -21,6 +21,26 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+        
+        Schema::create('billings', function (Blueprint $table) {
+            $table->increments('id');
+            
+        });
+        
+        Schema::create('notes', function (Blueprint $table) {
+            $table->increments('id');
+            
+        });
+        
+        Schema::create('locations', function (Blueprint $table) {
+            $table->increments('id');
+            
+        });
+        
+        Schema::create('plans', function (Blueprint $table) {
+            $table->increments('id');
+            
+        });
     }
 
     /**
@@ -31,5 +51,9 @@ class CreateUsersTable extends Migration
     public function down()
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('billings');
+        Schema::dropIfExists('notes');
+        Schema::dropIfExists('plans');
+        Schema::dropIfExists('locations');
     }
 }

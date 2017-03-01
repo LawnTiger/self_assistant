@@ -18,28 +18,40 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('inner_password');
             $table->rememberToken();
             $table->timestamps();
         });
         
         Schema::create('billings', function (Blueprint $table) {
             $table->increments('id');
-            
+            $table->bigInteger('user_id');
+            $table->double('cost', 10, 2);
+            $table->date('date');
+            $table->string('situation');
+            $table->timestamps();
         });
         
         Schema::create('notes', function (Blueprint $table) {
             $table->increments('id');
-            
+            $table->bigInteger('user_id');
+            $table->string('title');
+            $table->string('content');
+            $table->timestamps();
         });
         
         Schema::create('locations', function (Blueprint $table) {
             $table->increments('id');
-            
+            $table->bigInteger('user_id');
+            $table->double('lat', 15, 8);
+            $table->double('lng', 15, 8);
+            $table->timestamps();
         });
         
         Schema::create('plans', function (Blueprint $table) {
             $table->increments('id');
-            
+            $table->bigInteger('user_id');
+            $table->string('content');
         });
     }
 

@@ -45,6 +45,7 @@ class CreateUsersTable extends Migration
             $table->bigInteger('user_id');
             $table->double('lat', 15, 8);
             $table->double('lng', 15, 8);
+            $table->string('remarks');
             $table->timestamps();
         });
         
@@ -52,6 +53,8 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->bigInteger('user_id');
             $table->string('content');
+            $table->datetime('time');
+            $table->timestamps();
         });
     }
 

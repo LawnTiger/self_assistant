@@ -71,7 +71,7 @@
                     @if (Auth::check())
                         <a href="{{ url('/home') }}">Home</a>
                     @else
-                        <a href="{{ url('/login') }}">Login</a>
+                        <a href="{{ action('Auth\LoginController@index') }}">Login</a>
                         <a href="{{ url('/register') }}">Register</a>
                     @endif
                 </div>
@@ -79,15 +79,14 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    welcome to my<br /> self assistant
                 </div>
 
                 <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
+                    <a href="">billings</a>
+                    <a href="">notes</a>
+                    <a href="">locating</a>
+                    <a href="">plans</a>
                 </div>
             </div>
         </div>

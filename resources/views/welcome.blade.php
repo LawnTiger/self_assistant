@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+        <title>self assistant</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
@@ -70,6 +70,8 @@
                 <div class="top-right links">
                     @if (Auth::check())
                         <a href="{{ url('/home') }}">Home</a>
+                        <a href="{{ action('UserController@index') }}">{{ Auth::user()->name }}</a>
+                        <a href="{{ action('Auth\LoginController@logout') }}">Logout</a>
                     @else
                         <a href="{{ action('Auth\LoginController@index') }}">Login</a>
                         <a href="{{ url('/register') }}">Register</a>
@@ -79,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    welcome to my<br /> self assistant
+                    welcome to your<br /> self assistant
                 </div>
 
                 <div class="links">

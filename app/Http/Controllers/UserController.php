@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     public function index() 
     {
         return view('user');
@@ -14,5 +19,10 @@ class UserController extends Controller
     public function respwd()
     {
         
+    }
+    
+    public function profiles()
+    {
+    
     }
 }

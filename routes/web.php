@@ -29,4 +29,5 @@ Route::post('/register', 'Auth\RegisterController@register');
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/user', 'UserController@index');
     Route::get('/resetpwd', 'UserController@resetpwd');
+    Route::get('/profiles', 'UserController@profiles');
 });

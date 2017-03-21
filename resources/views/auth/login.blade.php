@@ -8,8 +8,8 @@
 </head>
 <body>
     <form method="POST">
-        user name:<input type="text" name="email"><br />
-        password :<input type="password" name="password"><br />
+        email:<input type="text" name="email" value="{{ old('email') }}" /><br />
+        password:<input type="password" name="password" /><br />
         {{ csrf_field() }}
         <input type="submit">
     </form>

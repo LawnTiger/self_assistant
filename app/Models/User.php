@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Hash;
 
 class User extends Authenticatable
 {
@@ -26,4 +27,17 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public static function resetpwd($id, $oldWord, $newWord)
+    {
+        $user = self::find($id);
+        $result = Hash::check($oldWord, $user->password);
+        if ($result === true) {
+            $user->password = Hash::make($newWord);
+            $user->save();
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

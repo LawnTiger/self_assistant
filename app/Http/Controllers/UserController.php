@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\ResetPwdRequest;
-use Hash;
+use App\Models\User;
 
 class UserController extends Controller
 {
@@ -18,12 +18,14 @@ class UserController extends Controller
         return view('user');
     }
 
-    public function respwd()
+    public function resetpwd(Request $request)
     {
-        print_r($request->all());
-        echo encrypt($request->new_word).'<br />';
-        echo bcrypt($request->new_word).'<br />';
-        echo Hash::make($request->new_word);
+        $result = User::resetpwd($request->user()->id, $request->new_word, $request->old_word);
+        if ($result) {
+            echo 1;
+        } else {
+            echo 0;
+        }
     }
 
     public function profiles()

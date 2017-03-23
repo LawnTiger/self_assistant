@@ -13,7 +13,7 @@ class ResetPwdRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,8 +24,8 @@ class ResetPwdRequest extends FormRequest
     public function rules()
     {
         return [
-            'old_word' => 'required|confirmed|min:6',
-            'new_word' => 'required|confirmed|min:6',
+            'old_word' => 'required|min:6',
+            'new_word' => 'required|min:6',
         ];
     }
 }

@@ -18,13 +18,14 @@ class UserController extends Controller
         return view('user');
     }
 
-    public function resetpwd(Request $request)
+    public function resetpwd(ResetPwdRequest $request)
     {
-        $result = User::resetpwd($request->user()->id, $request->new_word, $request->old_word);
+        $result = User::resetpwd($request->user()->id, $request->old_word, $request->new_word);
         if ($result) {
-            echo 1;
+            echo 'success';
+            return redirect('user');
         } else {
-            echo 0;
+            return redirect()->back()->withErrors('unmatch');
         }
     }
 

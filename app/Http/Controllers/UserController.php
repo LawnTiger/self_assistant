@@ -29,8 +29,8 @@ class UserController extends Controller
         }
     }
 
-    public function profiles()
+    public function profiles(Request $request)
     {
-
+        print_r($request->all());
     }
 }

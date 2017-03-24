@@ -20,5 +20,18 @@
             </ul>
         </form>
     </div>
+    <h4>update profile</h4>
+    <div>
+        <form action="{{ action('UserController@profiles') }}" method="POST">
+            username:<input type="text" name="username" /><br />
+            {{ csrf_field() }}
+            <input type="submit" />
+            <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+            </ul>
+        </form>
+    </div>
 </body>
 </html>

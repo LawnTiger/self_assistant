@@ -8,9 +8,20 @@
 @if (empty($notes->toArray()))
     没数据
 @endif
+<table border="1">
+    <tr>
+        <td>id</td>
+        <td>标题</td>
+        <td>内容</td>
+    </tr>
 @foreach ($notes as $note)
-    <p>{{ $note->id }}</p>
+    <tr>
+        <td>{{ $note->id }}</td>
+        <td>{{ $note->title }}</td>
+        <td>{{ $note->content }}</td>
+    </tr>
 @endforeach
+</table>
 
 @include('layouts.errors')
 

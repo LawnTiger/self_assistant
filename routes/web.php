@@ -30,6 +30,5 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('/user', 'UserController@index');
     Route::post('/resetpwd', 'UserController@resetpwd');
     Route::post('/profiles', 'UserController@profiles');
+    Route::resource('note', 'NoteController', ['only' => ['index']]);
 });
-// });
-// Route::get('/user', 'UserController@index')->middleware('auth');

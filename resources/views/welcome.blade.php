@@ -86,7 +86,7 @@
 
                 <div class="links">
                     <a href="">billings</a>
-                    <a href="">notes</a>
+                    <a href="{{ action('NoteController@index') }}">notes</a>
                     <a href="">locating</a>
                     <a href="">plans</a>
                 </div>

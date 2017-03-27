@@ -31,10 +31,9 @@ class UserController extends Controller
 
     public function profiles(Request $request)
     {
-        print_r($request->all());
-        $user = new User();
+        $user = User::find($request->user()->id);
         $user->name = $request->name;
         $user->save();
-        echo 'success';
+        return redirect('/');
     }
 }

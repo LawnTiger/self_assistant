@@ -23,7 +23,7 @@
     <h4>update profile</h4>
     <div>
         <form action="{{ action('UserController@profiles') }}" method="POST">
-            username:<input type="text" name="username" /><br />
+            username:<input type="text" name="name" /><br />
             {{ csrf_field() }}
             <input type="submit" />
             <ul>

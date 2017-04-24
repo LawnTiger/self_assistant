@@ -3,8 +3,6 @@
 @section('title', 'user')
 
 @section('content')
-<h3>user area</h3>
-TODO
 <h4>reset password</h4>
 <div>
     <form action="{{ action('UserController@resetpwd') }}" method="POST">

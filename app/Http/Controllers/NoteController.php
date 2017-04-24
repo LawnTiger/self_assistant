@@ -16,12 +16,26 @@ class NoteController extends Controller
 
     public function create()
     {
-
+        return view('note.create');
     }
 
-    public function destroy()
+    public function store(Request $request)
     {
+        $this->validate($request, [
+            'title' => 'required|max:255',
+            'content' => 'required',
+        ]);
 
+        $input = $request->all();
+        $input['user_id'] = $request->user()->id;
+        Note::saveNote($input);
+
+        return redirect('note');
+    }
+
+    public function destroy($id)
+    {
+        dd($id);
     }
 }
 

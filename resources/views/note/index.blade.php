@@ -8,6 +8,7 @@
 @if (empty($notes->toArray()))
     没数据
 @endif
+<a href="{{ action('NoteController@create') }}">新增</a>
 <table border="1">
     <tr>
         <td>id</td>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Note;
+use Illuminate\Support\Facades\Auth;
 
 class NoteController extends Controller
 {
@@ -33,21 +34,22 @@ class NoteController extends Controller
         ]);
 
         $input = $request->only(['title', 'content']);
-        $input['user_id'] = $request->user()->id;
+        $input['user_id'] = Auth::id();
         Note::saveNote($input);
 
         return redirect(action('NoteController@index'));
     }
 
-    public function edit(Request $request, $id)
+    public function edit($id)
     {
-        $note = Note::getNotes($request->user()->id, $id)[0];
+        $note = Note::getNotes(Auth::id(), $id)[0];
 
         return view('note.edit', compact('note'));
     }
 
     public function update(Request $request, $id)
     {
+        // TODO: 验证
         $input = $request->only(['title', 'content']);
         Note::updateNote($id, $input);
 
@@ -56,7 +58,9 @@ class NoteController extends Controller
 
     public function destroy($id)
     {
-        dd($id);
+        Note::where(array('user_id' => Auth::id(), 'id' => $id))->delete();
+
+        return redirect(action('NoteController@index'));
     }
 }
 

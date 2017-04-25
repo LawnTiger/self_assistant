@@ -16,6 +16,7 @@
         <td>内容</td>
         <td>时间</td>
         <td></td>
+        <td></td>
     </tr>
 @foreach ($notes as $note)
     <tr>
@@ -23,7 +24,15 @@
         <td>{{ $note->title }}</td>
         <td>{{ $note->content }}</td>
         <td>{{ $note->created_at }}</td>
-        <td><a href="{{ action('NoteController@edit', array('id' => $note->id)) }}">编辑</a></td>
+        <td><a href="{{ action('NoteController@edit', [$note->id]) }}">编辑</a></td>
+        <td>
+            <form action="{{ action('NoteController@destroy', [$note->id]) }}" method="post" id="form">
+                {{ method_field('DELETE') }}
+                {{ csrf_field() }}
+                {{--<a href="javascript:document.form.submit();">删除</a>--}}
+                <input type="submit" value="删除">
+            </form>
+        </td>
     </tr>
 @endforeach
 </table>

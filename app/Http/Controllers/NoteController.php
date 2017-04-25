@@ -7,6 +7,12 @@ use App\Models\Note;
 
 class NoteController extends Controller
 {
+    /**
+     * 记事本
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory
+     */
     public function index(Request $request)
     {
         $notes = Note::getNotes($request->user()->id);
@@ -26,11 +32,26 @@ class NoteController extends Controller
             'content' => 'required',
         ]);
 
-        $input = $request->all();
+        $input = $request->only(['title', 'content']);
         $input['user_id'] = $request->user()->id;
         Note::saveNote($input);
 
-        return redirect('note');
+        return redirect(action('NoteController@index'));
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $note = Note::getNotes($request->user()->id, $id)[0];
+
+        return view('note.edit', compact('note'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $input = $request->only(['title', 'content']);
+        Note::updateNote($id, $input);
+
+        return redirect(action('NoteController@index'));
     }
 
     public function destroy($id)

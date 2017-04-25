@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Note extends Model
 {
-    public static function getNotes($userId)
+    public static function getNotes($userId, $id = NULL)
     {
-        return self::where('user_id', '=', $userId)
-                ->orderBy('created_at', 'desc')->get();
+        $notes = self::where('user_id', $userId);
+        if (! empty($id)) {
+            $notes = $notes->where('id', $id);
+        }
+
+        return $notes->orderBy('created_at', 'desc')->get();
     }
 
     public static function saveNote($input)
@@ -21,5 +25,12 @@ class Note extends Model
         $note->save();
 
         return $note;
+    }
+
+    public static function updateNote($id, $input)
+    {
+        $note = new static;
+
+        return $note->where(compact('id'))->update($input);
     }
 }

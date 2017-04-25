@@ -14,12 +14,16 @@
         <td>id</td>
         <td>标题</td>
         <td>内容</td>
+        <td>时间</td>
+        <td></td>
     </tr>
 @foreach ($notes as $note)
     <tr>
         <td>{{ $note->id }}</td>
         <td>{{ $note->title }}</td>
         <td>{{ $note->content }}</td>
+        <td>{{ $note->created_at }}</td>
+        <td><a href="{{ action('NoteController@edit', array('id' => $note->id)) }}">编辑</a></td>
     </tr>
 @endforeach
 </table>

@@ -26,12 +26,7 @@
         <td>{{ $note->created_at }}</td>
         <td><a href="{{ action('NoteController@edit', [$note->id]) }}">编辑</a></td>
         <td>
-            <form action="{{ action('NoteController@destroy', [$note->id]) }}" method="post" id="form">
-                {{ method_field('DELETE') }}
-                {{ csrf_field() }}
-                {{--<a href="javascript:document.form.submit();">删除</a>--}}
-                <input type="submit" value="删除">
-            </form>
+            <a href="javascript:ajaxDelete({{ $note->id }});">删除</a>
         </td>
     </tr>
 @endforeach
@@ -40,3 +35,15 @@
 @include('layouts.errors')
 
 @endsection
+
+@section('script')
+<script>
+    function ajaxDelete(id) {
+        $.post("{{ url('note') }}/"+id, {'_method':'DELETE', '_token': '{{ csrf_token() }}'},
+            function(result){
+                alert('删除成功！');
+                location.reload();
+            }
+        );
+    }
+</script>

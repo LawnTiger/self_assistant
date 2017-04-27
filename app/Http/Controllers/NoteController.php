@@ -14,9 +14,9 @@ class NoteController extends Controller
      * @param Request $request
      * @return \Illuminate\Contracts\View\Factory
      */
-    public function index(Request $request)
+    public function index()
     {
-        $notes = Note::getNotes($request->user()->id);
+        $notes = Note::getNotes(Auth::id());
 
         return view('note.index', compact('notes'));
     }
@@ -29,7 +29,7 @@ class NoteController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'title' => 'required|max:255',
+            'title' => 'required',
             'content' => 'required',
         ]);
 
@@ -42,14 +42,17 @@ class NoteController extends Controller
 
     public function edit($id)
     {
-        $note = Note::getNotes(Auth::id(), $id)[0];
+        $note = Note::findOrFail($id);
+        $this->authorize('update', $note);
 
         return view('note.edit', compact('note'));
     }
 
     public function update(Request $request, $id)
     {
-        // TODO: 验证
+        $note = Note::findOrFail($id);
+        $this->authorize('update', $note);
+
         $input = $request->only(['title', 'content']);
         Note::updateNote($id, $input);
 
@@ -58,9 +61,10 @@ class NoteController extends Controller
 
     public function destroy($id)
     {
-        Note::where(array('user_id' => Auth::id(), 'id' => $id))->delete();
+        $note = Note::findOrFail($id);
+        $this->authorize('destroy', $note);
+        Note::destroy($id);
 
         return redirect(action('NoteController@index'));
     }
 }
-

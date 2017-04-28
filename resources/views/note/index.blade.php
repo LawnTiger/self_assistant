@@ -21,8 +21,8 @@
 @foreach ($notes as $note)
     <tr>
         <td>{{ $note->id }}</td>
-        <td>{{ $note->title }}</td>
-        <td>{{ $note->content }}</td>
+        <td><a href="{{ action('NoteController@show', [$note->id]) }}">{{ $note->title }}</a></td>
+        <td>{!! $note->content !!}</td>
         <td>{{ $note->created_at }}</td>
         <td><a href="{{ action('NoteController@edit', [$note->id]) }}">编辑</a></td>
         <td>
@@ -31,8 +31,6 @@
     </tr>
 @endforeach
 </table>
-
-@include('layouts.errors')
 
 @endsection
 
@@ -47,3 +45,4 @@
         );
     }
 </script>
+@endsection

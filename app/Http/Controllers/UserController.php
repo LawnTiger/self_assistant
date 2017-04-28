@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\ResetPwdRequest;
 use App\Models\User;
+use Auth;
 
 class UserController extends Controller
 {
@@ -20,7 +21,7 @@ class UserController extends Controller
 
     public function resetpwd(ResetPwdRequest $request)
     {
-        $result = User::resetpwd($request->user()->id, $request->old_word, $request->new_word);
+        $result = User::resetpwd(Auth::id(), $request->old_word, $request->new_word);
         if ($result) {
             echo 'success';
             return redirect('user');
@@ -31,7 +32,7 @@ class UserController extends Controller
 
     public function profiles(Request $request)
     {
-        $user = User::find($request->user()->id);
+        $user = User::findOrFail(Auth::id());
         $user->name = $request->name;
         $user->save();
         return redirect('/');

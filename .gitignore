@@ -7,3 +7,7 @@
 Homestead.json
 Homestead.yaml
 .env
+/_ide_helper.php
+_ide_helper.php
+config/ide-helper.php
+resources/views/vendor/

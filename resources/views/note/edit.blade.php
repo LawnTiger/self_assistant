@@ -9,7 +9,7 @@
         {{ csrf_field() }}
         {{ method_field('PUT') }}
         标题: <input type="text" name="title" value="{{ $note->title }}"><br>
-        内容: <input type="text" name="content" value="{{ $note->content }}"><br>
+        内容: <textarea name="content">{{ $note->content }}</textarea><br>
         <input type="submit" value="提交">
     </form>
 

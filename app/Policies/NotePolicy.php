@@ -10,12 +10,7 @@ class NotePolicy
 {
     use HandlesAuthorization;
 
-    public function update(User $user, Note $note)
-    {
-        return $user->id === $note->user_id;
-    }
-
-    public function destroy(User $user, Note $note)
+    public function own(User $user, Note $note)
     {
         return $user->id === $note->user_id;
     }

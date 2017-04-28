@@ -4,21 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Note;
-use Illuminate\Support\Facades\Auth;
+use Auth;
+use Markdown;
 
 class NoteController extends Controller
 {
     /**
      * 记事本
-     *
-     * @param Request $request
      * @return \Illuminate\Contracts\View\Factory
      */
     public function index()
     {
         $notes = Note::getNotes(Auth::id());
+        foreach ($notes as $note) {
+            $note->content = Markdown::convertToHtml($note->content);
+        }
 
         return view('note.index', compact('notes'));
+    }
+
+    public function show($id)
+    {
+        $note = Note::findOrFail($id);
+        $this->authorize('own', $note);
+        $note->content = Markdown::convertToHtml($note->content);
+
+        return view('note.show', compact('note'));
     }
 
     public function create()
@@ -43,7 +54,7 @@ class NoteController extends Controller
     public function edit($id)
     {
         $note = Note::findOrFail($id);
-        $this->authorize('update', $note);
+        $this->authorize('own', $note);
 
         return view('note.edit', compact('note'));
     }
@@ -51,7 +62,7 @@ class NoteController extends Controller
     public function update(Request $request, $id)
     {
         $note = Note::findOrFail($id);
-        $this->authorize('update', $note);
+        $this->authorize('own', $note);
 
         $input = $request->only(['title', 'content']);
         Note::updateNote($id, $input);
@@ -62,7 +73,7 @@ class NoteController extends Controller
     public function destroy($id)
     {
         $note = Note::findOrFail($id);
-        $this->authorize('destroy', $note);
+        $this->authorize('own', $note);
         Note::destroy($id);
 
         return redirect(action('NoteController@index'));

@@ -75,7 +75,5 @@ class NoteController extends Controller
         $note = Note::findOrFail($id);
         $this->authorize('own', $note);
         Note::destroy($id);
-
-        return redirect(action('NoteController@index'));
     }
 }

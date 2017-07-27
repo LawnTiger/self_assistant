@@ -12,6 +12,6 @@ class FriendController extends Controller
         // 显示好友
         $friends = Friend::getFriends(\Auth::id());
 
-        return view('chat.index', compact('friends'));
+        return view('friend.index', compact('friends'));
     }
 }

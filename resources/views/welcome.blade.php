@@ -70,6 +70,7 @@
                 <div class="top-right links">
                     @if (Auth::check())
                         <a href="{{ url('/home') }}">Home</a>
+                        <a href="{{ action('FriendController@index') }}">Friends</a>
                         <a href="{{ action('UserController@index') }}">{{ Auth::user()->name }}</a>
                         <a href="{{ action('Auth\LoginController@logout') }}">Logout</a>
                     @else

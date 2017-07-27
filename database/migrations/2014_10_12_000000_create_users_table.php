@@ -48,7 +48,7 @@ class CreateUsersTable extends Migration
             $table->string('remarks');
             $table->timestamps();
         });
-        
+
         Schema::create('plans', function (Blueprint $table) {
             $table->increments('id');
             $table->bigInteger('user_id');

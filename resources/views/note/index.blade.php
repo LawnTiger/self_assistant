@@ -37,7 +37,7 @@
 @section('script')
 <script>
     function ajaxDelete(id) {
-        $.post("{{ url('note') }}/"+id, {'_method':'DELETE', '_token': '{{ csrf_token() }}'},
+        $.post("{{ url('note') }}/"+id, {'_method':'DELETE'},
             function(result){
                 alert('删除成功！');
                 location.reload();

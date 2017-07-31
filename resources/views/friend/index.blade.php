@@ -20,7 +20,10 @@
                     <td>{{ $key }}</td>
                     <td>{{ $friend->name }}</td>
                     <td>{{ $friend->email }}</td>
-                    <td><a href="{{ action('ChatController@getIndex', ['to' => $friend->chat_key]) }}">chat</a></td>
+                    <td>
+                        <a href="{{ action('ChatController@getIndex', ['to' => $friend->chat_key]) }}">chat</a>
+                        <a href="javascript:ajaxDelete('{{ action('FriendController@destroy', $friend->id) }}');">delete</a>
+                    </td>
                 </tr>
             @endforeach
         </table>

@@ -33,5 +33,7 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::resource('note', 'NoteController');
 
-    Route::resource('friend', 'FriendController', ['only' => ['index', 'store', 'update']]);
+    Route::resource('friend', 'FriendController', ['only' => ['index', 'store', 'update', 'destroy']]);
+
+    Route::get('/chat', 'ChatController@getIndex');
 });

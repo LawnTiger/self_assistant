@@ -19,8 +19,8 @@ class CreateFriendsTable extends Migration
             $table->bigInteger('friend_id');
             $table->string('chat_key');
             $table->tinyInteger('status')->default(0)->comment('状态：0 未接受，1 接受');
-            $table->tinyInteger('is_delete')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

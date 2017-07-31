@@ -50,4 +50,9 @@ class FriendController extends Controller
 
         return response()->json(['status' => 1, 'message' => '成功']);
     }
+
+    public function destroy($id)
+    {
+        Friend::destroy($id);
+    }
 }

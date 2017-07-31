@@ -3,17 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Friend extends Model
 {
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
+
     public static function friendsList($user_id)
     {
         $friends1 = self::where('user_id', $user_id)
             ->leftjoin('users', 'users.id', '=', 'friends.friend_id')
-            ->where('status', 1)->where('is_delete', 0)->get();
+            ->where('status', 1)->select('friends.id', 'email', 'name', 'chat_key')->get();
         $friends2 = self::where('friend_id', $user_id)
             ->leftjoin('users', 'users.id', '=', 'friends.user_id')
-            ->where('status', 1)->where('is_delete', 0)->get();
+            ->where('status', 1)->select('friends.id', 'email', 'name', 'chat_key')->get();
         return $friends1->merge($friends2);
     }
 
@@ -37,7 +43,7 @@ class Friend extends Model
 
     public static function isAdd($from_id, $add_id)
     {
-        return self::friends($from_id, $add_id)->where('is_delete', 0)->first();
+        return self::friends($from_id, $add_id)->first();
     }
 
     public static function accept($friend_id, $accept_id, $type)

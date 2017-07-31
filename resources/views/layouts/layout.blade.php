@@ -7,6 +7,14 @@
         $.ajaxSetup({
             headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
         });
+        function ajaxDelete(url) {
+            $.post(url, {'_method':'DELETE'},
+                function(result){
+                    alert('删除成功！');
+                    location.reload();
+                }
+            );
+        }
     </script>
     @yield('style')
 </head>

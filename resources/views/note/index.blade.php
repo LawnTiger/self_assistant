@@ -26,23 +26,10 @@
         <td>{{ $note->created_at }}</td>
         <td><a href="{{ action('NoteController@edit', [$note->id]) }}">编辑</a></td>
         <td>
-            <a href="javascript:ajaxDelete({{ $note->id }});">删除</a>
+            <a href="javascript:ajaxDelete('{{ action('NoteController@destroy', $note->id) }}');">删除</a>
         </td>
     </tr>
 @endforeach
 </table>
 
-@endsection
-
-@section('script')
-<script>
-    function ajaxDelete(id) {
-        $.post("{{ url('note') }}/"+id, {'_method':'DELETE'},
-            function(result){
-                alert('删除成功！');
-                location.reload();
-            }
-        );
-    }
-</script>
 @endsection

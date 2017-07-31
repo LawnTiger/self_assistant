@@ -15,7 +15,7 @@
 
 @section('script')
 <script>
-    $('#add-friends').click(function () {console.log('?');
+    $('#add-friends').click(function () {
         var email = $('[name=email]').val();
         if (email == '') {
             alert('不能为空！');
@@ -23,11 +23,7 @@
         }
         $.post("{{ action('FriendController@store') }}", {'email': email},
             function(result) {
-                if (result.status == -1) {
-                    alert('未找到用户！');
-                } else {
-                    alert('请求成功！');
-                }
+                alert(result.message);
             }
         );
     });

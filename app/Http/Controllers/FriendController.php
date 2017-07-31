@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FriendUpdateRequest;
 use Illuminate\Http\Request;
 use App\Models\Friend;
 use App\Models\User;
@@ -10,10 +11,12 @@ class FriendController extends Controller
 {
     public function Index()
     {
-        // 显示好友
-        $friends = Friend::getFriends(\Auth::id());
+        $user_id = \Auth::id();
 
-        return view('friend.index', compact('friends'));
+        $friends = Friend::FriendsList($user_id);
+        $adds = Friend::addList($user_id);
+
+        return view('friend.index', compact('friends', 'adds'));
     }
 
     public function store(Request $request)
@@ -26,6 +29,9 @@ class FriendController extends Controller
             if (empty($add)) {
                 $result = Friend::addFriend($user_id, $add_id);
                 $message = '请求成功';
+            } elseif ($add['status'] == 0) {
+                $result = 1;
+                $message = '请求成功';
             } else {
                 $result = 2;
                 $message = '该用户已添加';
@@ -36,5 +42,12 @@ class FriendController extends Controller
         }
 
         return response()->json(['status' => $result, 'message' => $message]);
+    }
+
+    public function update(FriendUpdateRequest $request, $id)
+    {
+        Friend::accept(\Auth::id(), $id, $request->type);
+
+        return response()->json(['status' => 1, 'message' => '成功']);
     }
 }

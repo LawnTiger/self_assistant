@@ -53,6 +53,12 @@ class Friend extends Model
             ->update(['status' => $type]);
     }
 
+    public static function eachIds($key)
+    {
+        return self::where('chat_key', $key)->where('status', 1)
+            ->select('user_id', 'friend_id')->first();
+    }
+
     public function scopeFriends($query, $id1, $id2)
     {
         $query->where(function ($q) use ($id1, $id2) {

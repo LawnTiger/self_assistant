@@ -11,13 +11,7 @@ class ChatController extends Controller
     public function getIndex(Request $request)
     {
         $user_id = \Auth::id();
-        $each = Friend::eachIds($request->to);
-        if (empty($each)) {
-            return 'error';
-        }
 
-        $to = $each['user_id'] == $user_id ? $user_id : $each['friend_id'];
-
-        return view('friend.chat', compact('user_id', 'to'));
+        return view('friend.chat', compact('user_id'));
     }
 }

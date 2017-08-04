@@ -24,40 +24,35 @@ class SwooleRepositoriy
             $this->chatInit($frame->fd, $receive['data']);
         } else {
             $to = $mapping[$frame->fd];
-            $ws->push($to,$receive['msg']);
-//            foreach($GLOBALS['fd'] as $fd) {
-//                if ($frame->fd == $fd) {
-//                    continue;
-//                }
-//                if (Cache::get('mapping:' . $frame->fd) == Cache::get('mapping:' . $fd)) {
-//                    $ws->push($fd,$receive['msg']);
-//                }
-//            }
+            if (! empty($to)) {
+                $ws->push($to,$receive['msg']);
+            }
         }
-        $GLOBALS = Cache::get('fds');
-        $mapping = Cache::get('mapping');
-        print_r($GLOBALS);
-        print_r($mapping);
+        print_r(Cache::get('fds'));
+        print_r(Cache::get('mapping'));
     }
 
     public function onClose($ws, $fd)
     {
         echo "client-{$fd} is closed\n";
         $GLOBALS = Cache::pull('fds');
+        $mapping = Cache::get('mapping');
+        $user_id = '';
         foreach($GLOBALS['fd'] as $key => $fds) {
             if ($fds[0] == $fd) {
+                $user_id = $GLOBALS['fd'][$key];
                 unset($GLOBALS['fd'][$key]);
             }
         }
+        $key = array_search($user_id, $mapping);
+        $mapping[$key] = '';
         Cache::forever('fds', $GLOBALS);
+        Cache::forever('mapping', $mapping);
     }
 
     /**
      * cache::fds ->  fd => user_id
      * cache::mapping ->  fd => to_fd
-     * @param $fd
-     * @param $receive
-     * @return string
      */
     private function chatInit($fd, $receive)
     {
@@ -65,11 +60,13 @@ class SwooleRepositoriy
         $GLOBALS['fd'][$fd] = $receive['from'];
         Cache::forever('fds', $GLOBALS);
 
-        $to = $this->toId($receive['from'], $receive['to']);
-        $key = array_search($to, $GLOBALS['fd']);
-        $mapping = Cache::get('mapping') ?: [];
-        $mapping[$fd] = $key;
-        Cache::forever('mapping', $mapping);
+        if (! empty($receive['to'])) {
+            $to = $this->toId($receive['from'], $receive['to']);
+            $key = array_search($to, $GLOBALS['fd']);
+            $mapping = Cache::get('mapping') ?: [];
+            $mapping[$fd] = $key;
+            Cache::forever('mapping', $mapping);
+        }
     }
 
     private function toId($user_id, $key)

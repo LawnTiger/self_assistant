@@ -69,6 +69,26 @@
         location.reload();
     }
 </script>
+<script>
+    var ws = new WebSocket("ws://192.168.10.10:9501");
+
+    ws.onopen = function()
+    {
+        // Web Socket 已连接上，使用 send() 方法发送数据
+        ws.send(JSON.stringify({'type': 'init', 'data': {'from': '{{ \Auth::id() }}', 'to': ''}}));
+        console.log("连接开启...");
+    };
+
+    ws.onmessage = function (evt)
+    {
+        alert(evt.data);
+    };
+
+    ws.onclose = function()
+    {
+        console.log("连接已关闭...");
+    };
+</script>
 @endsection
 
 @section('style')

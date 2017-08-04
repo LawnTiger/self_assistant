@@ -8,10 +8,8 @@ use App\Models\Friend;
 
 class ChatController extends Controller
 {
-    public function getIndex(Request $request)
+    public function getIndex()
     {
-        $user_id = \Auth::id();
-
-        return view('friend.chat', compact('user_id'));
+        return view('friend.chat');
     }
 }

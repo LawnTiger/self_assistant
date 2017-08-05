@@ -25,7 +25,9 @@ class SwooleRepositoriy
         } else {
             $to = $mapping[$frame->fd];
             if (! empty($to)) {
-                $ws->push($to,$receive['msg']);
+                $ws->push($to, $receive['msg']);
+            } else {
+                // 保存数据库
             }
         }
         print_r(Cache::get('fds'));
@@ -35,19 +37,23 @@ class SwooleRepositoriy
     public function onClose($ws, $fd)
     {
         echo "client-{$fd} is closed\n";
-        $GLOBALS = Cache::pull('fds');
+        $GLOBALS = Cache::get('fds');
         $mapping = Cache::get('mapping');
-        $user_id = '';
-        foreach($GLOBALS['fd'] as $key => $fds) {
-            if ($fds[0] == $fd) {
-                $user_id = $GLOBALS['fd'][$key];
-                unset($GLOBALS['fd'][$key]);
-            }
+        if (array_key_exists($fd, $GLOBALS['fd'])) {
+            unset($GLOBALS['fd'][$fd]);
         }
-        $key = array_search($user_id, $mapping);
-        $mapping[$key] = '';
+
+        if (! empty($mapping)) {
+            $key = array_search($fd, $mapping);
+            if (! empty($key)) {
+                $mapping[$key] = '';
+            }
+            if (array_key_exists($fd, $mapping)) {
+                unset($mapping[$fd]);
+            }
+            Cache::forever('mapping', $mapping);
+        }
         Cache::forever('fds', $GLOBALS);
-        Cache::forever('mapping', $mapping);
     }
 
     /**
@@ -56,7 +62,7 @@ class SwooleRepositoriy
      */
     private function chatInit($fd, $receive)
     {
-        $GLOBALS = Cache::pull('fds');
+        $GLOBALS = Cache::get('fds');
         $GLOBALS['fd'][$fd] = $receive['from'];
         Cache::forever('fds', $GLOBALS);
 

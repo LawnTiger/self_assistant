@@ -32,6 +32,7 @@ class SwooleRepositoriy
         }
         print_r(Cache::get('fds'));
         print_r(Cache::get('mapping'));
+        print('=========================');
     }
 
     public function onClose($ws, $fd)
@@ -39,20 +40,21 @@ class SwooleRepositoriy
         echo "client-{$fd} is closed\n";
         $GLOBALS = Cache::get('fds');
         $mapping = Cache::get('mapping');
-        if (array_key_exists($fd, $GLOBALS['fd'])) {
-            unset($GLOBALS['fd'][$fd]);
-        }
 
         if (!empty($mapping)) {
             $key = array_search($fd, $mapping);
             if ($key !== false) {
-                $uid = $mapping[$key];
+                $uid = $GLOBALS['fd'][$fd];
                 $mapping[$key] = [$uid];
             }
             if (array_key_exists($fd, $mapping)) {
                 unset($mapping[$fd]);
             }
             Cache::forever('mapping', $mapping);
+        }
+
+        if (array_key_exists($fd, $GLOBALS['fd'])) {
+            unset($GLOBALS['fd'][$fd]);
         }
         Cache::forever('fds', $GLOBALS);
     }

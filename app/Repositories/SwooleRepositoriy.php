@@ -24,7 +24,7 @@ class SwooleRepositoriy
             $this->chatInit($frame->fd, $receive['data']);
         } else {
             $to = $mapping[$frame->fd];
-            if (! empty($to)) {
+            if (!is_array($to)) {
                 $ws->push($to, $receive['msg']);
             } else {
                 // 保存数据库
@@ -43,10 +43,11 @@ class SwooleRepositoriy
             unset($GLOBALS['fd'][$fd]);
         }
 
-        if (! empty($mapping)) {
+        if (!empty($mapping)) {
             $key = array_search($fd, $mapping);
-            if (! empty($key)) {
-                $mapping[$key] = '';
+            if ($key !== false) {
+                $uid = $mapping[$key];
+                $mapping[$key] = [$uid];
             }
             if (array_key_exists($fd, $mapping)) {
                 unset($mapping[$fd]);
@@ -56,21 +57,32 @@ class SwooleRepositoriy
         Cache::forever('fds', $GLOBALS);
     }
 
-    /**
+    /*
      * cache::fds ->  fd => user_id
      * cache::mapping ->  fd => to_fd
      */
     private function chatInit($fd, $receive)
     {
         $GLOBALS = Cache::get('fds');
+        $mapping = Cache::get('mapping') ?: [];
+
         $GLOBALS['fd'][$fd] = $receive['from'];
         Cache::forever('fds', $GLOBALS);
 
-        if (! empty($receive['to'])) {
+        $map_key = array_search([$receive['from']], $mapping);
+        if ($map_key !== false) {
+            $mapping[$map_key] = $fd;
+        }
+
+        if (!empty($receive['to'])) {
             $to = $this->toId($receive['from'], $receive['to']);
             $key = array_search($to, $GLOBALS['fd']);
-            $mapping = Cache::get('mapping') ?: [];
-            $mapping[$fd] = $key;
+            var_dump($key);
+            if ($key === false) {
+                $mapping[$fd] = [$to];
+            } else {
+                $mapping[$fd] = $key;
+            }
             Cache::forever('mapping', $mapping);
         }
     }

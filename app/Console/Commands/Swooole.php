@@ -59,6 +59,7 @@ class Swooole extends Command
     {
         $this->socket = new \swoole_websocket_server("0.0.0.0", 9501);
 
+        $this->socket->on('request', [$this->swoole, 'onRequest']);
         $this->socket->on('open', [$this->swoole, 'onOpen']);
         $this->socket->on('message', [$this->swoole, 'onMessage']);
         $this->socket->on('close', [$this->swoole, 'onClose']);

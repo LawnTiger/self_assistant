@@ -21,7 +21,9 @@
         ws.onopen = function()
         {
             // Web Socket 已连接上，使用 send() 方法发送数据
-            ws.send(JSON.stringify({'type': 'init', 'data': {'from': '{{ \Auth::id() }}', 'to': '{{ Request::get('to') }}'}}));
+            var data = JSON.stringify({'type': 'init', 'data': {'from': '{{ \Auth::id() }}', 'to': '{{ Request::get('to') }}'}});
+            console.log(data);
+            ws.send(data);
             console.log("连接开启...");
         };
 

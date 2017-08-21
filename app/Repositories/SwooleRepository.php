@@ -5,7 +5,7 @@ namespace App\Repositories;
 use Cache;
 use App\Models\Friend;
 
-class SwooleRepositoriy
+class SwooleRepository
 {
     public function onOpen($ws, $request)
     {

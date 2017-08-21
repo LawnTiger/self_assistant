@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Repositories\SwooleRepositoriy;
+use App\Repositories\SwooleRepository;
 
 class Swooole extends Command
 {
@@ -27,9 +27,9 @@ class Swooole extends Command
     /**
      * Create a new command instance.
      *
-     * @return void
+     * @param $swoole SwooleRepository swoole仓库
      */
-    public function __construct(SwooleRepositoriy $swoole)
+    public function __construct(SwooleRepository $swoole)
     {
         parent::__construct();
         $this->swoole = $swoole;

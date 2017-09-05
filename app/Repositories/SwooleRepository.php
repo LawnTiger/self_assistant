@@ -3,102 +3,60 @@
 namespace App\Repositories;
 
 use Cache;
-use App\Models\Friend;
 
 class SwooleRepository
 {
     public function onOpen($ws, $request)
     {
-        $GLOBALS = Cache::pull('fds') ?: [];
-        $GLOBALS['fd'][$request->fd] = 0;
-        Cache::forever('fds', $GLOBALS);
         echo "client  >> {$request->fd} <<  is connected\n";
     }
 
     public function onMessage($ws, $frame)
     {
-        $GLOBALS = Cache::get('fds');
-        $mapping = Cache::get('mapping');
         $receive = json_decode($frame->data, true);
         if ($receive['type'] == 'init') {
-            $this->chatInit($frame->fd, $receive['data']);
+            $this->chatInit($receive['data']['id'], $frame->fd);
         } else {
-            $to = $mapping[$frame->fd];
-            if (!is_array($to)) {
-                $ws->push($to, $receive['msg']);
-            } else {
-                // 保存数据库
-            }
+            $to = $receive['data']['to'];
+            $message = $receive['data']['msg'];
+            $to_fd = $this->mapping_get('user', $to);
+            $ws->push($to_fd, $message);
         }
-        print_r(Cache::get('fds'));
         print_r(Cache::get('mapping'));
-        print('=========================');
     }
 
     public function onClose($ws, $fd)
     {
         echo "client-{$fd} is closed\n";
-        $GLOBALS = Cache::get('fds');
+        $this->chatOut($fd);
+    }
+
+    private function chatInit($id, $fd)
+    {
         $mapping = Cache::get('mapping');
-
-        if (!empty($mapping)) {
-            $key = array_search($fd, $mapping);
-            if ($key !== false) {
-                $uid = $GLOBALS['fd'][$fd];
-                $mapping[$key] = [$uid];
-            }
-            if (array_key_exists($fd, $mapping)) {
-                unset($mapping[$fd]);
-            }
-            Cache::forever('mapping', $mapping);
-        }
-
-        if (array_key_exists($fd, $GLOBALS['fd'])) {
-            unset($GLOBALS['fd'][$fd]);
-        }
-        Cache::forever('fds', $GLOBALS);
+        $mapping[] = ['user' => $id, 'fd' => $fd];
+        Cache::forever('mapping', $mapping);
     }
 
-    public function onRequest($request, $response)
+    private function chatOut($fd)
     {
-        print_r($request);
-        $response->end("<h1>hello swoole</h1>");
-    }
-
-    /*
-     * cache::fds ->  fd => user_id
-     * cache::mapping ->  fd => to_fd
-     */
-    private function chatInit($fd, $receive)
-    {
-        $GLOBALS = Cache::get('fds');
-        $mapping = Cache::get('mapping') ?: [];
-
-        $GLOBALS['fd'][$fd] = $receive['from'];
-        Cache::forever('fds', $GLOBALS);
-
-        $map_key = array_search([$receive['from']], $mapping);
-        if ($map_key !== false) {
-            $mapping[$map_key] = $fd;
-        }
-
-        if (!empty($receive['to'])) {
-            $to = $this->toId($receive['from'], $receive['to']);
-            $key = array_search($to, $GLOBALS['fd']);
-            var_dump($key);
-            if ($key === false) {
-                $mapping[$fd] = [$to];
-            } else {
-                $mapping[$fd] = $key;
+        $mapping = Cache::get('mapping');
+        foreach ($mapping as $key => $pair) {
+            if ($pair['fd'] == $fd) {
+                unset($mapping[$key]);
             }
-            Cache::forever('mapping', $mapping);
         }
+        Cache::forever('mapping', $mapping);
     }
 
-    private function toId($user_id, $key)
+    private function mapping_get($key, $value)
     {
-        $each = Friend::eachIds($key);
-
-        return $each['user_id'] == $user_id ? $each['friend_id'] : $each['user_id'];
+        $key2 = $key == 'user' ? 'fd' : 'user';
+        $mapping = Cache::get('mapping');
+        foreach ($mapping as $k => $v) {
+            if ($v[$key] == $value) {
+                return $v[$key2];
+            }
+        }
     }
 }

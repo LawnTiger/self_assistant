@@ -17,11 +17,12 @@
             </tr>
             @foreach($friends as $key => $friend)
                 <tr>
-                    <td>{{ $key }}</td>
+                    <td>{{ $friend->friend_id }}</td>
                     <td>{{ $friend->name }}</td>
                     <td>{{ $friend->email }}</td>
                     <td>
-                        <a href="{{ action('ChatController@getIndex', ['to' => $friend->chat_key]) }}">chat</a>
+                        {{--<a href="{{ action('ChatController@getIndex', ['to' => $friend->chat_key]) }}">chat</a>--}}
+                        <button onclick="chat_set({{ $friend->friend_id }}, '{{ $friend->name }}')">chat</button>
                         <a href="javascript:ajaxDelete('{{ action('FriendController@destroy', $friend->id) }}');">delete</a>
                     </td>
                 </tr>
@@ -42,10 +43,40 @@
             <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 1)">accept</button>
             <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 3)">reject</button>
         @endforeach
+        <hr>
+    </div>
+    <div>
+        <h4>chat</h4>
+        <h5>content</h5>
+        <div class="chat-content"></div>
+        <span class="to-whom"></span><br>
+        <input type="text" class="send-content"><button onclick="chat_send()" class="chat-send">sent</button>
     </div>
 @endsection
 
 @section('script')
+<script>
+    var ws = new WebSocket("ws://192.168.10.10:9501");
+
+    ws.onopen = function()
+    {
+        // Web Socket 已连接上，使用 send() 方法发送数据
+        var data = JSON.stringify({'type': 'init', 'data': {'id': '{{ \Auth::id() }}'}});
+        console.log(data);
+        ws.send(data);
+        console.log("连接开启...");
+    };
+
+    ws.onmessage = function (evt)
+    {
+        alert(evt.data);
+    };
+
+    ws.onclose = function()
+    {
+        console.log("连接已关闭...");
+    };
+</script>
 <script>
     $('#add-friends').click(function () {
         var email = $('[name=email]').val();
@@ -68,28 +99,21 @@
         );
         location.reload();
     }
-</script>
-<script>
-    var ws = new WebSocket("ws://192.168.10.10:9501");
 
-    ws.onopen = function()
+    function chat_set(id, name)
     {
-        // Web Socket 已连接上，使用 send() 方法发送数据
-        var data = JSON.stringify({'type': 'init', 'data': {'from': '{{ \Auth::id() }}', 'to': ''}});
+        $('.to-whom').html(name);
+        $('.chat-send').attr('data-id', id);
+    }
+
+    function chat_send()
+    {
+        var content = $('.send-content').val();
+        var id = $('.chat-send').attr('data-id');
+        var data = JSON.stringify({'type': 'send', 'data': {'to': id, 'msg': content}});
         console.log(data);
         ws.send(data);
-        console.log("连接开启...");
-    };
-
-    ws.onmessage = function (evt)
-    {
-        alert(evt.data);
-    };
-
-    ws.onclose = function()
-    {
-        console.log("连接已关闭...");
-    };
+    }
 </script>
 @endsection
 

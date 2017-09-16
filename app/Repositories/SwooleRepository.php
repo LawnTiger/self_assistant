@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\User;
 use Cache;
 
 class SwooleRepository
@@ -17,10 +18,13 @@ class SwooleRepository
         if ($receive['type'] == 'init') {
             $this->chatInit($receive['data']['id'], $frame->fd);
         } else {
+            $user_id = $this->mapping_get('fd', $frame->fd);
+            $user = User::find($user_id);
             $to = $receive['data']['to'];
             $message = $receive['data']['msg'];
             $to_fd = $this->mapping_get('user', $to);
-            $ws->push($to_fd, $message);
+            $send = json_encode(['from' => $user_id, 'name' => $user->name, 'msg' => $message]);
+            $ws->push($to_fd, $send);
         }
         print_r(Cache::get('mapping'));
     }
@@ -49,6 +53,11 @@ class SwooleRepository
         Cache::forever('mapping', $mapping);
     }
 
+    /**
+     * @param $key string 'fd' or 'user'
+     * @param $value id
+     * @return int
+     */
     private function mapping_get($key, $value)
     {
         $key2 = $key == 'user' ? 'fd' : 'user';

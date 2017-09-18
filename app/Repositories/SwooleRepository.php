@@ -15,17 +15,29 @@ class SwooleRepository
     public function onMessage($ws, $frame)
     {
         $receive = json_decode($frame->data, true);
-        if ($receive['type'] == 'init') {
+        $condition_init = array_has($receive, ['type', 'data.id']) && $receive['type'] == 'init';
+        $condition_send = array_has($receive, ['type', 'data.to', 'data.msg']) && $receive['type'] == 'send';
+
+        if ($condition_init) {
             $this->chatInit($receive['data']['id'], $frame->fd);
-        } else {
+        } elseif ($condition_send) {
             $user_id = $this->mapping_get('fd', $frame->fd);
             $user = User::find($user_id);
             $to = $receive['data']['to'];
             $message = $receive['data']['msg'];
             $to_fd = $this->mapping_get('user', $to);
             $send = json_encode(['from' => $user_id, 'name' => $user->name, 'msg' => $message]);
-            $ws->push($to_fd, $send);
+
+            if ($to_fd) {
+                $ws->push($to_fd, $send);
+            } else {
+                // TODO: save to database
+                print_r($send);
+            }
+        } else {
+            print_r('json_error\n');
         }
+
         print_r(Cache::get('mapping'));
     }
 

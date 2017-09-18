@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Message;
 use App\Models\User;
 use Cache;
 
@@ -33,6 +34,7 @@ class SwooleRepository
             } else {
                 // TODO: save to database
                 print_r($send);
+                Message::create(['from_id' => $user_id, 'to_id' => $to, 'message' => $message]);
             }
         } else {
             print_r('json_error\n');

@@ -48,7 +48,11 @@
     <div>
         <h4>chat</h4>
         <h5>content</h5>
-        <div class="chat-content"></div>
+        <div class="chat-content">
+            @foreach ($messages as $message)
+                {{ $message->created_at }} <br>from {{ $message->user->name }} : {{ $message->message }}<br>
+            @endforeach
+        </div>
         <span class="to-whom"></span>
         <input type="text" class="send-content"><button onclick="chat_send()" class="chat-send">sent</button>
     </div>

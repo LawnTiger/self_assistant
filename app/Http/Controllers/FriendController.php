@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FriendUpdateRequest;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use App\Models\Friend;
 use App\Models\User;
@@ -15,8 +16,9 @@ class FriendController extends Controller
 
         $friends = Friend::FriendsList($user_id);
         $adds = Friend::addList($user_id);
+        $messages = Message::messageList($user_id);
 
-        return view('friend.index', compact('friends', 'adds'));
+        return view('friend.index', compact('friends', 'adds', 'messages'));
     }
 
     public function store(Request $request)

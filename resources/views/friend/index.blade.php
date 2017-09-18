@@ -49,7 +49,7 @@
         <h4>chat</h4>
         <h5>content</h5>
         <div class="chat-content"></div>
-        <span class="to-whom"></span><br>
+        <span class="to-whom"></span>
         <input type="text" class="send-content"><button onclick="chat_send()" class="chat-send">sent</button>
     </div>
 @endsection
@@ -62,14 +62,15 @@
     {
         // Web Socket 已连接上，使用 send() 方法发送数据
         var data = JSON.stringify({'type': 'init', 'data': {'id': '{{ \Auth::id() }}'}});
-        console.log(data);
         ws.send(data);
         console.log("连接开启...");
     };
 
     ws.onmessage = function (evt)
     {
-        alert(evt.data);
+        console.log(evt);
+        var recieve = JSON.parse(evt.data);
+        $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
     };
 
     ws.onclose = function()
@@ -102,17 +103,19 @@
 
     function chat_set(id, name)
     {
-        $('.to-whom').html(name);
+        $('.to-whom').html('to ' + name);
         $('.chat-send').attr('data-id', id);
+        $('.chat-send').attr('data-name', name);
     }
 
     function chat_send()
     {
         var content = $('.send-content').val();
         var id = $('.chat-send').attr('data-id');
+        var name = $('.chat-send').attr('data-name');
         var data = JSON.stringify({'type': 'send', 'data': {'to': id, 'msg': content}});
-        console.log(data);
         ws.send(data);
+        $('.chat-content').append('<span class="blue">to ' + name + ' : ' + content + '</span><br>');
     }
 </script>
 @endsection
@@ -121,6 +124,9 @@
 <style>
     td {
         padding: 5px;
+    }
+    .blue {
+        color: #3768ff;
     }
 </style>
 @endsection

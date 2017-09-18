@@ -114,8 +114,16 @@
 
     function chat_send()
     {
-        var content = $('.send-content').val();
         var id = $('.chat-send').attr('data-id');
+        if (id == undefined) {
+            alert('请选择发送人');
+            return ;
+        }
+        var content = $('.send-content').val();
+        if (content == '') {
+            alert('请输入发送内容');
+            return ;
+        }
         var name = $('.chat-send').attr('data-name');
         var data = JSON.stringify({'type': 'send', 'data': {'to': id, 'msg': content}});
         ws.send(data);

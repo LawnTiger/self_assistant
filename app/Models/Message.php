@@ -11,7 +11,7 @@ class Message extends Model
 
     public static function messageList($id)
     {
-        $list = self::where('to_id', $id)->where('is_read', 0)->with('user')->orderBy('id')->get();
+        $list = self::where('to_id', $id)->where('is_read', 0)->with('user')->orderBy('from_id')->get();
         self::where('to_id', $id)->where('is_read', 0)->update(['is_read' => 1]);
         return $list;
     }

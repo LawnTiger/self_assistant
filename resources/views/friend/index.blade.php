@@ -37,7 +37,7 @@
     </div>
     <hr>
     @if (count($adds) != 0)
-    <div>
+    <div class="add-list">
         <h4>add notices</h4>
         @foreach ($adds as $user)
             email: {{ $user['email'] }}, nickname: {{ $user['name'] }}<br>
@@ -79,7 +79,11 @@
         if (evt.from) {
             $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
         } else {
-            alert('加');
+            $.get("{{ action('FriendController@checkAdd') }}",
+                function (response) {
+                    alert('some one add you, please reload to see it');
+                }
+            );
         }
     };
 
@@ -114,7 +118,7 @@
                 alert(result.message);
             }
         );
-//        location.reload();
+        location.reload();
     }
 
     function chat_set(id, name)

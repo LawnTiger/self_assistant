@@ -28,9 +28,10 @@ class FriendController extends Controller
 
         if (! empty($add_id)) {
             $add = Friend::isAdd($user_id, $add_id);
-            if (empty($add)) {
+            if (empty($add) || $add->status == 2) {
+                Friend::addFriend($user_id, $add_id);
                 $result = 1;
-                $message = Friend::addFriend($user_id, $add_id);
+                $message = $add_id;
             } elseif ($add->status == 0) {
                 $result = 1;
                 $message = $add->id;
@@ -56,5 +57,11 @@ class FriendController extends Controller
     public function destroy($id)
     {
         Friend::destroy($id);
+    }
+
+    public function checkAdd()
+    {
+        $adds = Friend::addList(\Auth::id());
+        return response()->json([$adds->toArray()]);
     }
 }

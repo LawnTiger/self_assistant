@@ -36,15 +36,17 @@
         <button id="add-friends">add friend</button>
     </div>
     <hr>
+    @if (count($adds) != 0)
     <div>
         <h4>add notices</h4>
         @foreach ($adds as $user)
             email: {{ $user['email'] }}, nickname: {{ $user['name'] }}<br>
             <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 1)">accept</button>
-            <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 3)">reject</button>
+            <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 2)">reject</button>
         @endforeach
         <hr>
     </div>
+    @endif
     <div>
         <h4>chat</h4>
         <h5>content</h5>
@@ -74,7 +76,11 @@
     {
         console.log(evt);
         var recieve = JSON.parse(evt.data);
-        $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
+        if (evt.from) {
+            $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
+        } else {
+            alert('加');
+        }
     };
 
     ws.onclose = function()
@@ -91,9 +97,15 @@
         }
         $.post("{{ action('FriendController@store') }}", {'email': email},
             function(result) {
+                if (result.status == 1) {console.log(result);
+                    var data = JSON.stringify({'type': 'send', 'data': {'to': result.message}});
+                    console.log(data);
+                    ws.send(data);
+                }
                 alert(result.message);
             }
         );
+
     });
 
     function addFriend(href, type) {
@@ -102,7 +114,7 @@
                 alert(result.message);
             }
         );
-        location.reload();
+//        location.reload();
     }
 
     function chat_set(id, name)

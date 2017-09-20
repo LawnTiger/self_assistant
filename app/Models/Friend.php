@@ -8,18 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Friend extends Model
 {
     use SoftDeletes;
-
     protected $dates = ['deleted_at'];
-
 
     public static function friendsList($user_id)
     {
         $friends1 = self::where('user_id', $user_id)
-            ->leftjoin('users', 'users.id', '=', 'friends.friend_id')
-            ->where('status', 1)->select('friends.friend_id', 'email', 'name', 'chat_key')->get();
+            ->leftjoin('users', 'users.id', '=', 'friends.friend_id')->where('status', 1)
+            ->select('friends.id', 'friends.friend_id', 'email', 'name', 'chat_key')->get();
         $friends2 = self::where('friend_id', $user_id)
-            ->leftjoin('users', 'users.id', '=', 'friends.user_id')
-            ->where('status', 1)->select('friends.user_id as friend_id', 'email', 'name', 'chat_key')->get();
+            ->leftjoin('users', 'users.id', '=', 'friends.user_id')->where('status', 1)
+            ->select('friends.id', 'friends.user_id as friend_id', 'email', 'name', 'chat_key')->get();
         $friends2->map(function ($item, $key) use($friends1) {
             $friends1->push($item);
         });
@@ -42,6 +40,7 @@ class Friend extends Model
         $string = md5($from_id . $add_id . time() . random_bytes(5));
         $instance->chat_key = $string;
         $instance->save();
+        return $instance->id;
     }
 
     public static function isAdd($from_id, $add_id)

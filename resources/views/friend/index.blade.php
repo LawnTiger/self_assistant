@@ -76,7 +76,7 @@
     {
         console.log(evt);
         var recieve = JSON.parse(evt.data);
-        if (evt.from) {
+        if (recieve.from) {
             $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
         } else {
             $.get("{{ action('FriendController@checkAdd') }}",

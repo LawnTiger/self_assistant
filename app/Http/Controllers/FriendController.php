@@ -31,20 +31,22 @@ class FriendController extends Controller
             if (empty($add) || $add->status == 2) {
                 Friend::addFriend($user_id, $add_id);
                 $result = 1;
-                $message = $add_id;
+                $data['message'] = '添加成功';
+                $data['id'] = $add_id;
             } elseif ($add->status == 0) {
                 $result = 1;
-                $message = $add->id;
+                $data['message'] = '添加成功';
+                $data['id'] = $add_id;
             } else {
                 $result = 2;
-                $message = '该用户已添加';
+                $data['message'] = '该用户已添加';
             }
         } else {
             $result = -1;
-            $message = '未找到用户';
+            $data['message'] = '未找到用户';
         }
 
-        return response()->json(['status' => $result, 'message' => $message]);
+        return response()->json(['status' => $result, 'data' => $data]);
     }
 
     public function update(FriendUpdateRequest $request, $id)

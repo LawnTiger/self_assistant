@@ -79,11 +79,12 @@
         if (recieve.from) {
             $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
         } else {
-            $.get("{{ action('FriendController@checkAdd') }}",
-                function (response) {
-                    alert('some one add you, please reload to see it');
-                }
-            );
+            alert('some one add you, please reload to see it');
+            {{--$.get("{{ action('FriendController@checkAdd') }}",--}}
+                {{--function (response) {--}}
+                    {{--alert('some one add you, please reload to see it');--}}
+                {{--}--}}
+            {{--);--}}
         }
     };
 
@@ -101,12 +102,11 @@
         }
         $.post("{{ action('FriendController@store') }}", {'email': email},
             function(result) {
-                if (result.status == 1) {console.log(result);
-                    var data = JSON.stringify({'type': 'send', 'data': {'to': result.message}});
-                    console.log(data);
+                if (result.status == 1) {
+                    var data = JSON.stringify({'type': 'send', 'data': {'to': result.data.id}});
                     ws.send(data);
                 }
-                alert(result.message);
+                alert(result.data.message);
             }
         );
 

@@ -45,7 +45,7 @@ class Friend extends Model
 
     public static function isAdd($from_id, $add_id)
     {
-        return self::friends($from_id, $add_id)->first();
+        return self::friends($from_id, $add_id)->orderBy('id', 'desc')->first();
     }
 
     public static function accept($friend_id, $accept_id, $type)

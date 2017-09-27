@@ -26,7 +26,7 @@ class FriendController extends Controller
         $user_id = \Auth::id();
         $add_id = User::whereEmail($request->email)->value('id');
 
-        if (! empty($add_id)) {
+        if (!empty($add_id)) {
             $add = Friend::isAdd($user_id, $add_id);
             if (empty($add) || $add->status == 2) {
                 Friend::addFriend($user_id, $add_id);
@@ -61,9 +61,18 @@ class FriendController extends Controller
         Friend::destroy($id);
     }
 
-    public function checkAdd()
+    public function get_list(Request $request)
     {
-        $adds = Friend::addList(\Auth::id());
-        return response()->json([$adds->toArray()]);
+        $type = $request->type;
+        $user_id = \Auth::id();
+        switch ($type) {
+            case 1:
+                $list = Friend::addList($user_id);
+                break;
+            case 2:
+                $list = Friend::FriendsList($user_id);
+                break;
+        }
+        return response()->json($list->toArray());
     }
 }

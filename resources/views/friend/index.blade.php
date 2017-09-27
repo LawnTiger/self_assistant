@@ -36,17 +36,16 @@
         <button id="add-friends">add friend</button>
     </div>
     <hr>
-    @if (count($adds) != 0)
     <div class="add-list">
         <h4>add notices</h4>
         @foreach ($adds as $user)
             email: {{ $user['email'] }}, nickname: {{ $user['name'] }}<br>
-            <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 1)">accept</button>
-            <button id="add-friends" onclick="addFriend('{{ action('FriendController@update', $user->adder_id) }}', 2)">reject</button>
+            <button id="add-friends" onclick="addFriend('{{ $user->adder_id }}', 1)">accept</button>
+            <button id="add-friends" onclick="addFriend('{{ $user->adder_id }}', 2)">reject</button>
+            <br>
         @endforeach
-        <hr>
     </div>
-    @endif
+    <hr>
     <div>
         <h4>chat</h4>
         <h5>content</h5>
@@ -79,12 +78,16 @@
         if (recieve.from) {
             $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
         } else {
-            alert('some one add you, please reload to see it');
-            {{--$.get("{{ action('FriendController@checkAdd') }}",--}}
-                {{--function (response) {--}}
-                    {{--alert('some one add you, please reload to see it');--}}
-                {{--}--}}
-            {{--);--}}
+            alert('add notices');
+            $.get("{{ action('FriendController@get_list', ['type' => 1]) }}",
+                function (response) {
+                    console.log(response);
+                    for (var i=0;i<response.length;i++)
+                    {
+                        add_notice(response[i]);
+                    }
+                }
+            );
         }
     };
 
@@ -94,6 +97,16 @@
     };
 </script>
 <script>
+
+    function add_notice(adder)
+    {
+        var add = "email: " + adder.email + ", nickname: " + adder.name + "<br>";
+        add += '<button id="add-friends" onclick="addFriend(\'' + adder.adder_id + '\', 1)">accept</button>';
+        add += '<button id="add-friends" onclick="addFriend(\'' + adder.adder_id + '\', 2)">reject</button>';
+        console.log(add);
+        $('.add-list').append(add);
+    }
+
     $('#add-friends').click(function () {
         var email = $('[name=email]').val();
         if (email == '') {
@@ -109,11 +122,10 @@
                 alert(result.data.message);
             }
         );
-
     });
 
-    function addFriend(href, type) {
-        $.post(href, {'_method': 'PUT', 'type': type},
+    function addFriend(id, type) {
+        $.post("{{ url('friend') }}/" + id, {'_method': 'PUT', 'type': type},
             function(result) {
                 alert(result.message);
             }

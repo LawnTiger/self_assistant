@@ -31,11 +31,11 @@ class FriendController extends Controller
             if (empty($add) || $add->status == 2) {
                 Friend::addFriend($user_id, $add_id);
                 $result = 1;
-                $data['message'] = '添加成功';
+                $data['message'] = '请求成功';
                 $data['id'] = $add_id;
             } elseif ($add->status == 0) {
                 $result = 1;
-                $data['message'] = '添加成功';
+                $data['message'] = '请求成功';
                 $data['id'] = $add_id;
             } else {
                 $result = 2;

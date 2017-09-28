@@ -13,32 +13,52 @@ class SwooleRepository
         echo "client  >> {$request->fd} <<  is connected\n";
     }
 
+    /**
+     * receive message
+     * @param $ws
+     * @param $frame
+     * formact:
+     *   ['type' => 'init', 'data' => ['id' => id]]
+     *   ['type' => 'chat', 'data' => ['to' => id, 'msg' => message]]
+     *   ['type' => 'notice', 'data' => ['to' => id, 'type' => type]]
+     */
     public function onMessage($ws, $frame)
     {
         $receive = json_decode($frame->data, true);
 
         if ($receive['type'] == 'init') {
+            // socket init
             $this->chatInit($receive['data']['id'], $frame->fd);
-        } elseif ($receive['type'] == 'send') {
+            return ;
+        } else {
             $user_id = $this->mapping_get('fd', $frame->fd);
             $user = User::find($user_id);
             $to_id = $receive['data']['to'];
             $to_fd = $this->mapping_get('user', $to_id);
+        }
 
-            if (isset($receive['data']['msg'])) {
-                $message = $receive['data']['msg'];
-                $send = json_encode(['from' => $user_id, 'name' => $user->name, 'msg' => $message]);
-                if ($to_fd) {
-                    $ws->push($to_fd, $send);
-                } else {
-                    Message::create(['from_id' => $user_id, 'to_id' => $to_id, 'message' => $message]);
-                }
-            } elseif (!isset($receive['data']['msg']) && !empty($to_fd)) {
-                $ws->push($to_fd, json_encode(['type' => 'add']));
+        if ($receive['type'] == 'chat') {
+            // sb chat to sb
+            $message = $receive['data']['msg'];
+            $send = json_encode(['from' => $user_id, 'name' => $user->name, 'msg' => $message]);
+            if ($to_fd) {
+                $ws->push($to_fd, $send);
+            } else {
+                Message::create(['from_id' => $user_id, 'to_id' => $to_id, 'message' => $message]);
             }
-
-        } else {
-            print_r('json_error\n');
+        } elseif ($receive['type'] == 'notice' && $to_fd) {
+            // notice: add / accept / reject
+            if ($receive['data']['type'] == 'add') {
+                $notice = ['type' => 'add', 'notice' => 'some one add you'];
+            } elseif ($receive['data']['type'] == 'accept') {
+                $notice = ['type' => 'accept', 'notice' => 'accept you'];
+            } elseif ($receive['data']['type'] == 'reject') {
+                $notice = ['type' => 'reject', 'notice' => 'reject you'];
+            } else {
+                return ;
+            }
+            $ws->push($to_fd, json_encode(['type' => 'notice',
+                'data' => $notice]));
         }
 
         print_r(Cache::get('mapping'));

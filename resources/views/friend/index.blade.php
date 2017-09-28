@@ -21,7 +21,6 @@
                     <td>{{ $friend->name }}</td>
                     <td>{{ $friend->email }}</td>
                     <td>
-                        {{--<a href="{{ action('ChatController@getIndex', ['to' => $friend->chat_key]) }}">chat</a>--}}
                         <button onclick="chat_set({{ $friend->friend_id }}, '{{ $friend->name }}')">chat</button>
                         <a href="javascript:ajaxDelete('{{ action('FriendController@destroy', $friend->id) }}');">delete</a>
                     </td>
@@ -75,19 +74,21 @@
     {
         console.log(evt);
         var recieve = JSON.parse(evt.data);
-        if (recieve.from) {
+        if (recieve.type == 'send') {
             $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
-        } else {
-            alert('add notices');
-            $.get("{{ action('FriendController@get_list', ['type' => 1]) }}",
-                function (response) {
-                    console.log(response);
-                    for (var i=0;i<response.length;i++)
-                    {
-                        add_notice(response[i]);
+        } else if (recieve.type == 'notice') {
+            alert(recieve.data.notice);
+            if (recieve.data.type == 'add') {
+                $.get("{{ action('FriendController@get_list', ['type' => 1]) }}",
+                    function (response) {
+                        console.log(response);
+                        for (var i=0;i<response.length;i++)
+                        {
+                            add_notice(response[i]);
+                        }
                     }
-                }
-            );
+                );
+            }
         }
     };
 
@@ -107,6 +108,7 @@
         $('.add-list').append(add);
     }
 
+    // add friend
     $('#add-friends').click(function () {
         var email = $('[name=email]').val();
         if (email == '') {
@@ -116,7 +118,7 @@
         $.post("{{ action('FriendController@store') }}", {'email': email},
             function(result) {
                 if (result.status == 1) {
-                    var data = JSON.stringify({'type': 'send', 'data': {'to': result.data.id}});
+                    var data = JSON.stringify({'type': 'notice', 'data': {'type': 'add', 'to': result.data.id}});
                     ws.send(data);
                 }
                 alert(result.data.message);
@@ -125,12 +127,18 @@
     });
 
     function addFriend(id, type) {
-        $.post("{{ url('friend') }}/" + id, {'_method': 'PUT', 'type': type},
-            function(result) {
-                alert(result.message);
+        var url = "{{ url('friend') }}/" + id;
+        var param = {'_method': 'PUT', 'type': type};
+        alert(url);
+        console.log(param);
+        $.post(url, param, function(result) {
+            alert(result.message);
+            if (type == 2) {
+                var data = JSON.stringify({'type': 'notice', 'data': {'type':'reject', 'to': id}});
+                ws.send(data);
             }
-        );
-        location.reload();
+            location.reload();
+        });
     }
 
     function chat_set(id, name)
@@ -153,7 +161,7 @@
             return ;
         }
         var name = $('.chat-send').attr('data-name');
-        var data = JSON.stringify({'type': 'send', 'data': {'to': id, 'msg': content}});
+        var data = JSON.stringify({'type': 'chat', 'data': {'to': id, 'msg': content}});
         ws.send(data);
         $('.chat-content').append('<span class="blue">to ' + name + ' : ' + content + '</span><br>');
     }

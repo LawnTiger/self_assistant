@@ -129,14 +129,14 @@
     function addFriend(id, type) {
         var url = "{{ url('friend') }}/" + id;
         var param = {'_method': 'PUT', 'type': type};
-        alert(url);
-        console.log(param);
         $.post(url, param, function(result) {
             alert(result.message);
             if (type == 2) {
-                var data = JSON.stringify({'type': 'notice', 'data': {'type':'reject', 'to': id}});
-                ws.send(data);
+                var data = {'type': 'notice', 'data': {'type':'reject', 'to': id}};
+            } else if (type == 1) {
+                var data = {'type': 'notice', 'data': {'type':'accept', 'to': id}};
             }
+            ws.send(JSON.stringify(data));
             location.reload();
         });
     }

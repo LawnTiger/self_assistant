@@ -8,24 +8,13 @@
 
     <div>
         <h4>your friends</h4>
-        <table border="1">
+        <table border="1" id="friends-list">
             <tr>
                 <td>no</td>
                 <td>name</td>
                 <td>email</td>
                 <td>do</td>
             </tr>
-            @foreach($friends as $key => $friend)
-                <tr>
-                    <td>{{ $friend->friend_id }}</td>
-                    <td>{{ $friend->name }}</td>
-                    <td>{{ $friend->email }}</td>
-                    <td>
-                        <button onclick="chat_set({{ $friend->friend_id }}, '{{ $friend->name }}')">chat</button>
-                        <a href="javascript:ajaxDelete('{{ action('FriendController@destroy', $friend->id) }}');">delete</a>
-                    </td>
-                </tr>
-            @endforeach
         </table>
     </div>
 
@@ -37,12 +26,6 @@
     <hr>
     <div class="add-list">
         <h4>add notices</h4>
-        @foreach ($adds as $user)
-            email: {{ $user['email'] }}, nickname: {{ $user['name'] }}<br>
-            <button id="add-friends" onclick="addFriend('{{ $user->adder_id }}', 1)">accept</button>
-            <button id="add-friends" onclick="addFriend('{{ $user->adder_id }}', 2)">reject</button>
-            <br>
-        @endforeach
     </div>
     <hr>
     <div>
@@ -79,15 +62,7 @@
         } else if (recieve.type == 'notice') {
             alert(recieve.data.notice);
             if (recieve.data.type == 'add') {
-                $.get("{{ action('FriendController@get_list', ['type' => 1]) }}",
-                    function (response) {
-                        console.log(response);
-                        for (var i=0;i<response.length;i++)
-                        {
-                            add_notice(response[i]);
-                        }
-                    }
-                );
+                add_notice();
             }
         }
     };
@@ -98,14 +73,42 @@
     };
 </script>
 <script>
-
-    function add_notice(adder)
+    $(function(){
+        refresh_friends();
+        add_notice();
+    });
+    function refresh_friends()
     {
-        var add = "email: " + adder.email + ", nickname: " + adder.name + "<br>";
-        add += '<button id="add-friends" onclick="addFriend(\'' + adder.adder_id + '\', 1)">accept</button>';
-        add += '<button id="add-friends" onclick="addFriend(\'' + adder.adder_id + '\', 2)">reject</button>';
-        console.log(add);
-        $('.add-list').append(add);
+        console.log('refreshing');
+        $.get("{{ action('FriendController@get_list', ['type' => 2]) }}",
+            function (response) {
+                $('#friends-list tr:gt(0):not(:eq(1))').remove();
+                for (var i=0;i<response.length;i++)
+                {
+                    console.log(response[i]);
+                    var tr = '<tr><td>'+response[i].friend_id+'</td><td>'+response[i].name+'</td><td>'+response[i].email+'</td><td><button>chat</button> <a href="">delete</a></td></tr>';
+                    console.log(tr);
+                    $("#friends-list tr:last").after(tr);
+                }
+            }
+        );
+    }
+
+    function add_notice()
+    {
+        $.get("{{ action('FriendController@get_list', ['type' => 1]) }}",
+            function (response) {
+                console.log(response);
+                for (var i=0;i<response.length;i++)
+                {
+                    var add = "email: " + response[i].email + ", nickname: " + response[i].name + "<br>";
+                    add += '<button id="add-friends" onclick="addFriend(\'' + response[i].adder_id + '\', 1)">accept</button>';
+                    add += '<button id="add-friends" onclick="addFriend(\'' + response[i].adder_id + '\', 2)">reject</button>';
+                    console.log(add);
+                    $('.add-list').append(add);
+                }
+            }
+        );
     }
 
     // add friend

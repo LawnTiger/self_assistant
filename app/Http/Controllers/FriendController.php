@@ -13,12 +13,9 @@ class FriendController extends Controller
     public function Index()
     {
         $user_id = \Auth::id();
-
-        $friends = Friend::FriendsList($user_id);
-        $adds = Friend::addList($user_id);
         $messages = Message::messageList($user_id);
 
-        return view('friend.index', compact('friends', 'adds', 'messages'));
+        return view('friend.index', compact('messages'));
     }
 
     public function store(Request $request)

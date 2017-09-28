@@ -47,13 +47,14 @@ class SwooleRepository
                 Message::create(['from_id' => $user_id, 'to_id' => $to_id, 'message' => $message]);
             }
         } elseif ($receive['type'] == 'notice' && $to_fd) {
+            $sb = $user->name . '(' . $user->email . ')';
             // notice: add / accept / reject
             if ($receive['data']['type'] == 'add') {
                 $notice = ['type' => 'add', 'notice' => 'some one add you'];
             } elseif ($receive['data']['type'] == 'accept') {
-                $notice = ['type' => 'accept', 'notice' => 'accept you'];
+                $notice = ['type' => 'accept', 'notice' => $sb . ' accept you'];
             } elseif ($receive['data']['type'] == 'reject') {
-                $notice = ['type' => 'reject', 'notice' => 'reject you'];
+                $notice = ['type' => 'reject', 'notice' => $sb . ' reject you'];
             } else {
                 return ;
             }

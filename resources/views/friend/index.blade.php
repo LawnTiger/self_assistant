@@ -72,10 +72,10 @@
 
     ws.onmessage = function (evt)
     {
-        console.log(evt);
+        console.log(evt.data);
         var recieve = JSON.parse(evt.data);
-        if (recieve.type == 'send') {
-            $('.chat-content').append(recieve.name + ' : ' + recieve.msg + '<br>');
+        if (recieve.type == 'chat') {
+            $('.chat-content').append(recieve.data.name + ' : ' + recieve.data.msg + '<br>');
         } else if (recieve.type == 'notice') {
             alert(recieve.data.notice);
             if (recieve.data.type == 'add') {

@@ -40,7 +40,7 @@ class SwooleRepository
         if ($receive['type'] == 'chat') {
             // sb chat to sb
             $message = $receive['data']['msg'];
-            $send = json_encode(['from' => $user_id, 'name' => $user->name, 'msg' => $message]);
+            $send = json_encode(['type' => 'chat', 'data' => ['from' => $user_id, 'name' => $user->name, 'msg' => $message]]);
             if ($to_fd) {
                 $ws->push($to_fd, $send);
             } else {

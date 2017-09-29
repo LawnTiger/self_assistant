@@ -24,8 +24,9 @@
         <button id="add-friends">add friend</button>
     </div>
     <hr>
-    <div class="add-list">
+    <div>
         <h4>add notices</h4>
+        <div class="add-list"></div>
     </div>
     <hr>
     <div>
@@ -82,17 +83,15 @@
 
     function refresh_friends()
     {
-        console.log('refreshing');
         $.get("{{ action('FriendController@get_list', ['type' => 2]) }}",
             function (response) {
-                $('#friends-list tr:gt(0):not(:eq(1))').remove();
+                console.log(response);
+                $('#friends-list tr:not(:eq(0))').remove();
                 for (var i=0;i<response.length;i++)
                 {
-                    console.log(response[i]);
                     var tr = '<tr><td>'+response[i].friend_id+'</td><td>'+response[i].name+'</td><td>'+response[i].email+
                         '</td><td><button onclick="chat_set('+response[i].friend_id+', \''+response[i].name+'\')">chat</button>'+
                         '<a href="javascript:ajaxDelete(\'{{ url('friend') }}/'+response[i].id+'\');">delete</a></td></tr>';
-                    console.log(tr);
                     $("#friends-list tr:last").after(tr);
                 }
             }
@@ -104,6 +103,7 @@
         $.get("{{ action('FriendController@get_list', ['type' => 1]) }}",
             function (response) {
                 console.log(response);
+                $('.add-list').html('');
                 for (var i=0;i<response.length;i++)
                 {
                     var add = "email: " + response[i].email + ", nickname: " + response[i].name + "<br>";
@@ -146,6 +146,7 @@
             }
             ws.send(JSON.stringify(data));
             refresh_friends();
+            add_notice();
         });
     }
 

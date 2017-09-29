@@ -63,6 +63,8 @@
             alert(recieve.data.notice);
             if (recieve.data.type == 'add') {
                 add_notice();
+            } else if (recieve.data.type == 'accept') {
+                refresh_friends();
             }
         }
     };
@@ -77,6 +79,7 @@
         refresh_friends();
         add_notice();
     });
+
     function refresh_friends()
     {
         console.log('refreshing');
@@ -86,7 +89,9 @@
                 for (var i=0;i<response.length;i++)
                 {
                     console.log(response[i]);
-                    var tr = '<tr><td>'+response[i].friend_id+'</td><td>'+response[i].name+'</td><td>'+response[i].email+'</td><td><button>chat</button> <a href="">delete</a></td></tr>';
+                    var tr = '<tr><td>'+response[i].friend_id+'</td><td>'+response[i].name+'</td><td>'+response[i].email+
+                        '</td><td><button onclick="chat_set('+response[i].friend_id+', \''+response[i].name+'\')">chat</button>'+
+                        '<a href="javascript:ajaxDelete(\'{{ url('friend') }}/'+response[i].id+'\');">delete</a></td></tr>';
                     console.log(tr);
                     $("#friends-list tr:last").after(tr);
                 }
@@ -102,8 +107,8 @@
                 for (var i=0;i<response.length;i++)
                 {
                     var add = "email: " + response[i].email + ", nickname: " + response[i].name + "<br>";
-                    add += '<button id="add-friends" onclick="addFriend(\'' + response[i].adder_id + '\', 1)">accept</button>';
-                    add += '<button id="add-friends" onclick="addFriend(\'' + response[i].adder_id + '\', 2)">reject</button>';
+                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].adder_id + '\', 1)">accept</button>';
+                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].adder_id + '\', 2)">reject</button>';
                     console.log(add);
                     $('.add-list').append(add);
                 }
@@ -129,7 +134,7 @@
         );
     });
 
-    function addFriend(id, type) {
+    function add_friend(id, type) {
         var url = "{{ url('friend') }}/" + id;
         var param = {'_method': 'PUT', 'type': type};
         $.post(url, param, function(result) {
@@ -140,7 +145,7 @@
                 var data = {'type': 'notice', 'data': {'type':'accept', 'to': id}};
             }
             ws.send(JSON.stringify(data));
-            location.reload();
+            refresh_friends();
         });
     }
 

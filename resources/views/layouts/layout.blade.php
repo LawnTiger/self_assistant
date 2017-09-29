@@ -11,7 +11,7 @@
             $.post(url, {'_method':'DELETE'},
                 function(result){
                     alert('删除成功！');
-                    location.reload();
+                    refresh_friends();
                 }
             );
         }

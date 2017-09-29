@@ -19,7 +19,10 @@ class Friend extends Model
             ->leftjoin('users', 'users.id', '=', 'friends.user_id')->where('status', 1)
             ->select('friends.id', 'friends.user_id as friend_id', 'email', 'name', 'chat_key')->get();
         $friends2->map(function ($item, $key) use($friends1) {
-            $friends1->push($item);
+            // prevent from repeated
+            if (! $friends1->contains($item)) {
+                $friends1->push($item);
+            }
         });
         return $friends1;
     }

@@ -40,6 +40,21 @@
         <span class="to-whom"></span>
         <input type="text" class="send-content"><button onclick="chat_send()" class="chat-send">sent</button>
     </div>
+
+
+    <h2>group</h2>
+    <hr>
+
+    <div>
+        <h4>your groups</h4>
+        <table border="1" id="group-list">
+            <tr>
+                <td>no</td>
+                <td>group name</td>
+                <td>do</td>
+            </tr>
+        </table>
+    </div>
 @endsection
 
 @section('script')
@@ -79,6 +94,7 @@
     $(function(){
         refresh_friends();
         add_notice();
+        refresh_groups();
     });
 
     function refresh_friends()
@@ -93,6 +109,20 @@
                         '</td><td><button onclick="chat_set('+response[i].friend_id+', \''+response[i].name+'\')">chat</button>'+
                         '<a href="javascript:ajaxDelete(\'{{ url('friend') }}/'+response[i].id+'\');">delete</a></td></tr>';
                     $("#friends-list tr:last").after(tr);
+                }
+            }
+        );
+    }
+
+    function refresh_groups()
+    {
+        $.get("{{ action('GroupController@index') }}",
+            function (response) {
+                console.log(response);
+                $('#group-list tr:not(:eq(0))').remove();
+                for (var i=0;i<response.length;i++)
+                {
+
                 }
             }
         );

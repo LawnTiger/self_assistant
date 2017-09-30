@@ -10,7 +10,8 @@ class GroupController extends Controller
 {
     public function index()
     {
-
+        $group = GroupMember::get_list(\Auth::id());
+        return response()->json($group);
     }
 
     public function store(Request $request)

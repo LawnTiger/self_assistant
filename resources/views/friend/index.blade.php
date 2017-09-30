@@ -44,7 +44,6 @@
 
     <h2>group</h2>
     <hr>
-
     <div>
         <h4>your groups</h4>
         <table border="1" id="group-list">
@@ -54,6 +53,12 @@
                 <td>do</td>
             </tr>
         </table>
+    </div>
+
+    <div>
+        <h4>create group</h4>
+        name: <input type="text" name="name" />
+        <button id="create-group">create</button>
     </div>
 @endsection
 
@@ -146,7 +151,6 @@
         );
     }
 
-    // add friend
     $('#add-friends').click(function () {
         var email = $('[name=email]').val();
         if (email == '') {
@@ -160,6 +164,20 @@
                     ws.send(data);
                 }
                 alert(result.data.message);
+            }
+        );
+    });
+
+    $('#create-group').click(function () {
+        var name = $('[name=name]').val();
+        if (name == '') {
+            alert('群名不能为空！');
+            return ;
+        }
+        $.post("{{ action('GroupController@store') }}", {'name': name},
+            function(result) {
+                alert('添加成功');
+                refresh_groups();
             }
         );
     });

@@ -10,6 +10,11 @@ class GroupMember extends Model
 
     public static function get_list($id)
     {
+        return self::where('user_id', $id)->with('group')->get();
+    }
 
+    public function group()
+    {
+        return $this->belongsTo('App\Models\group', 'group_id');
     }
 }

@@ -13,7 +13,7 @@ class FriendController extends Controller
     public function Index()
     {
         $user_id = \Auth::id();
-        $messages = Message::messageList($user_id);
+        $messages = Message::message_list($user_id);
 
         return view('friend.index', compact('messages'));
     }

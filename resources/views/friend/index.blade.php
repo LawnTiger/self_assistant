@@ -10,7 +10,7 @@
         <h4>your friends</h4>
         <table border="1" id="friends-list">
             <tr>
-                <td>no</td>
+                <td>id</td>
                 <td>name</td>
                 <td>email</td>
                 <td>do</td>
@@ -48,7 +48,7 @@
         <h4>your groups</h4>
         <table border="1" id="group-list">
             <tr>
-                <td>no</td>
+                <td>id</td>
                 <td>group name</td>
                 <td>do</td>
             </tr>
@@ -127,7 +127,8 @@
                 $('#group-list tr:not(:eq(0))').remove();
                 for (var i=0;i<response.length;i++)
                 {
-
+                    var tr = '<tr><td>'+response[i].group.id+'</td><td>'+response[i].group.name+'</td><td><button>chat</button>';
+                    $("#group-list tr:last").after(tr);
                 }
             }
         );

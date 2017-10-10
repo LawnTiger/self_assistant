@@ -49,14 +49,18 @@ class SwooleRepository
         } elseif ($receive['type'] == 'notice' && $to_fd) {
             $sb = $user->name . '(' . $user->email . ')';
             // notice: add / accept / reject
-            if ($receive['data']['type'] == 'add') {
-                $notice = ['type' => 'add', 'notice' => 'some one add you'];
-            } elseif ($receive['data']['type'] == 'accept') {
-                $notice = ['type' => 'accept', 'notice' => $sb . ' accept you'];
-            } elseif ($receive['data']['type'] == 'reject') {
-                $notice = ['type' => 'reject', 'notice' => $sb . ' reject you'];
-            } else {
-                return ;
+            switch ($receive['data']['type']) {
+                case 'add':
+                    $notice = ['type' => 'add', 'notice' => 'some one add you'];
+                    break;
+                case 'accept':
+                    $notice = ['type' => 'accept', 'notice' => $sb . ' accept you'];
+                    break;
+                case 'reject':
+                    $notice = ['type' => 'reject', 'notice' => $sb . ' reject you'];
+                    break;
+                default:
+                    return ;
             }
             $ws->push($to_fd, json_encode(['type' => 'notice',
                 'data' => $notice]));

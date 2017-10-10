@@ -54,6 +54,9 @@
             </tr>
         </table>
     </div>
+    <div id="group-add" style="display: none;">
+        add member: <input type="text" id="group-add-input"><button onclick="group_add()">ok</button>
+    </div>
 
     <div>
         <h4>create group</h4>
@@ -111,7 +114,7 @@
                 for (var i=0;i<response.length;i++)
                 {
                     var tr = '<tr><td>'+response[i].friend_id+'</td><td>'+response[i].name+'</td><td>'+response[i].email+
-                        '</td><td><button onclick="chat_set('+response[i].friend_id+', \''+response[i].name+'\')">chat</button>'+
+                        '</td><td><button onclick="chat_set('+response[i].friend_id+', \''+response[i].name+'\')">chat</button> '+
                         '<a href="javascript:ajaxDelete(\'{{ url('friend') }}/'+response[i].id+'\');">delete</a></td></tr>';
                     $("#friends-list tr:last").after(tr);
                 }
@@ -127,7 +130,8 @@
                 $('#group-list tr:not(:eq(0))').remove();
                 for (var i=0;i<response.length;i++)
                 {
-                    var tr = '<tr><td>'+response[i].group.id+'</td><td>'+response[i].group.name+'</td><td><button>chat</button>';
+                    var tr = '<tr><td>'+response[i].group.id+'</td><td>'+response[i].group.name+
+                        '</td><td><button>chat</button> <button onclick="group_add_show('+response[i].group.id+')">add</button></td></tr>';
                     $("#group-list tr:last").after(tr);
                 }
             }
@@ -150,6 +154,22 @@
                 }
             }
         );
+    }
+
+    function group_add_show(id) {
+        $('#group-add').show();
+        $('#group-add').attr('data-id', id);
+    }
+
+    function group_add() {
+        var group = $('#group-add').attr('data-id');
+        var user = $('#group-add-input').val();
+        $.post('{{ action('GroupController@update', 1) }}',
+            {'group_id': group, 'user_id': user, '_method': 'PUT'},
+            function (result) {
+                alert(result);
+            }
+        )
     }
 
     $('#add-friends').click(function () {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\GroupMember;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -20,12 +21,22 @@ class GroupController extends Controller
         GroupMember::create(['group_id' => $group->id, 'user_id' => \Auth::id()]);
     }
 
-    public function update()
+    public function update(Request $request)
     {
-
+        $user = User::find($request->user_id);
+        if (empty($user)) {
+            return 'no this user';
+        }
+        $input = $request->only(['group_id', 'user_id']);
+        $group = GroupMember::where($input)->count();
+        if ($group > 0) {
+            return 'already in group';
+        }
+        GroupMember::create($input);
+        return 'ok';
     }
 
-    public function destroy()
+    public function show($id)
     {
 
     }

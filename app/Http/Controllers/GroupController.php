@@ -38,6 +38,9 @@ class GroupController extends Controller
 
     public function show($id)
     {
-
+        $members = GroupMember::where('group_id', $id)->with('user')->get();
+        foreach ($members as $member) {
+            echo $member->user->name . " ({$member->user->email})" . '<br>';
+        }
     }
 }

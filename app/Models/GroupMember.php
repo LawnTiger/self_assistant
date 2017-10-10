@@ -15,6 +15,11 @@ class GroupMember extends Model
 
     public function group()
     {
-        return $this->belongsTo('App\Models\group', 'group_id');
+        return $this->belongsTo('App\Models\Group', 'group_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User', 'user_id');
     }
 }

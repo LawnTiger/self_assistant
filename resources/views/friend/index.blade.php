@@ -131,7 +131,8 @@
                 for (var i=0;i<response.length;i++)
                 {
                     var tr = '<tr><td>'+response[i].group.id+'</td><td>'+response[i].group.name+
-                        '</td><td><button>chat</button> <button onclick="group_add_show('+response[i].group.id+')">add</button></td></tr>';
+                        '</td><td><button>chat</button> <a target="_blank" href="{{ url('group') }}/'+response[i].group.id+'">member</a> '
+                        +'<button onclick="group_add_show('+response[i].group.id+')">add</button></td></tr>';
                     $("#group-list tr:last").after(tr);
                 }
             }

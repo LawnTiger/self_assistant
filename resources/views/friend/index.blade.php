@@ -38,7 +38,7 @@
             @endforeach
         </div>
         <span class="to-whom"></span>
-        <input type="text" class="send-content"><button onclick="chat_send()" class="chat-send">sent</button>
+        <input type="text" class="send-content"><button onclick="chat_send('user')" class="chat-send">sent</button>
     </div>
 
 
@@ -63,6 +63,16 @@
         name: <input type="text" name="name" />
         <button id="create-group">create</button>
     </div>
+    <hr>
+    <div>
+        <h4>group chat</h4>
+        <h5>content</h5>
+        <div class="group-content">
+
+        </div>
+        <span class="to-group"></span>
+        <input type="text" class="group-send-content"><button onclick="chat_send('group')" class="group-send">sent</button>
+    </div>
 @endsection
 
 @section('script')
@@ -83,6 +93,8 @@
         var recieve = JSON.parse(evt.data);
         if (recieve.type == 'chat') {
             $('.chat-content').append(recieve.data.name + ' : ' + recieve.data.msg + '<br>');
+        } else if(recieve.type == 'group') {
+            $('.group-content').append(recieve.data.name + ' : ' + recieve.data.msg + '<br>');
         } else if (recieve.type == 'notice') {
             alert(recieve.data.notice);
             if (recieve.data.type == 'add') {
@@ -130,8 +142,9 @@
                 $('#group-list tr:not(:eq(0))').remove();
                 for (var i=0;i<response.length;i++)
                 {
-                    var tr = '<tr><td>'+response[i].group.id+'</td><td>'+response[i].group.name+
-                        '</td><td><button>chat</button> <a target="_blank" href="{{ url('group') }}/'+response[i].group.id+'">member</a> '
+                    var tr = '<tr><td>'+response[i].group.id+'</td><td>'+response[i].group.name
+                        +'</td><td><button onclick="chat_set('+response[i].group.id+',\''+response[i].group.name+'\', \'group\')">chat</button>'
+                        +'<a target="_blank" href="{{ url('group') }}/'+response[i].group.id+'">member</a> '
                         +'<button onclick="group_add_show('+response[i].group.id+')">add</button></td></tr>';
                     $("#group-list tr:last").after(tr);
                 }
@@ -220,29 +233,45 @@
         });
     }
 
-    function chat_set(id, name)
+    function chat_set(id, name, type)
     {
-        $('.to-whom').html('to ' + name);
-        $('.chat-send').attr('data-id', id);
-        $('.chat-send').attr('data-name', name);
+        if (type == undefined) {
+            $('.to-whom').html('to ' + name);
+            $('.chat-send').attr('data-id', id);
+            $('.chat-send').attr('data-name', name);
+        } else {
+            $('.to-group').html('to ' + name);
+            $('.group-send').attr('data-id', id);
+            $('.group-send').attr('data-name', name);
+        }
     }
 
-    function chat_send()
+    function chat_send(type)
     {
-        var id = $('.chat-send').attr('data-id');
+        if (type == 'user') {
+            var select_send = '.chat-send';
+            var select_content = '.send-content';
+            var select_show = '.chat-content';
+        } else {
+            var select_send = '.group-send';
+            var select_content = '.group-send-content';
+            var select_show = '.group-content';
+        }
+        var id = $(select_send).attr('data-id');
         if (id == undefined) {
             alert('请选择发送人');
             return ;
         }
-        var content = $('.send-content').val();
+        var content = $(select_content).val();
         if (content == '') {
             alert('请输入发送内容');
             return ;
         }
-        var name = $('.chat-send').attr('data-name');
-        var data = JSON.stringify({'type': 'chat', 'data': {'to': id, 'msg': content}});
+        var name = $(select_send).attr('data-name');
+        var data = JSON.stringify({'type': 'chat', 'data': {'to': id, 'msg': content, 'type': type}});
         ws.send(data);
-        $('.chat-content').append('<span class="blue">to ' + name + ' : ' + content + '</span><br>');
+        console.log(data);
+        $(select_show).append('<span class="blue">to ' + name + ' : ' + content + '</span><br>');
     }
 </script>
 @endsection

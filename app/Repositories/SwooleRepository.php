@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\GroupMember;
 use App\Models\Message;
 use App\Models\User;
 use Cache;
@@ -19,7 +20,8 @@ class SwooleRepository
      * @param $frame
      * formact:
      *   ['type' => 'init', 'data' => ['id' => id]]
-     *   ['type' => 'chat', 'data' => ['to' => id, 'msg' => message]]
+     *   ['type' => 'chat', 'data' => ['to' => id, 'msg' => message, 'type' => user]]
+     *   ['type' => 'chat', 'data' => ['to' => group_id, 'msg' => message, 'type' => group]]
      *   ['type' => 'notice', 'data' => ['to' => id, 'type' => type]]
      */
     public function onMessage($ws, $frame)
@@ -34,19 +36,37 @@ class SwooleRepository
             $user_id = $this->mapping_get('fd', $frame->fd);
             $user = User::find($user_id);
             $to_id = $receive['data']['to'];
-            $to_fd = $this->mapping_get('user', $to_id);
         }
 
         if ($receive['type'] == 'chat') {
-            // sb chat to sb
-            $message = $receive['data']['msg'];
-            $send = json_encode(['type' => 'chat', 'data' => ['from' => $user_id, 'name' => $user->name, 'msg' => $message]]);
-            if ($to_fd) {
-                $ws->push($to_fd, $send);
-            } else {
-                Message::create(['from_id' => $user_id, 'to_id' => $to_id, 'message' => $message]);
+            if ($receive['data']['type'] == 'user') {
+                // sb chat to sb
+                $to_fd = $this->mapping_get('user', $to_id);
+                $message = $receive['data']['msg'];
+                $send = json_encode(['type' => 'chat', 'data' => ['from' => $user_id, 'name' => $user->name, 'msg' => $message]]);
+                if ($to_fd) {
+                    $ws->push($to_fd, $send);
+                } else {
+                    Message::create(['from_id' => $user_id, 'to_id' => $to_id, 'message' => $message]);
+                }
+
+            } elseif($receive['data']['type'] == 'group') {
+                $group_member = $this->get_members($to_id);
+                $fds = [];dump($group_member->toArray());
+                foreach ($group_member as $member) {
+                    $fds[] = $this->mapping_get('fd', $member->user_id);
+                }
+                $message = $receive['data']['msg'];
+                $send = json_encode(['type' => 'group', 'data' => ['from' => $user_id, 'name' => $user->name, 'msg' => $message]]);
+                foreach ($fds as $fd) {
+                    if ($fd) {
+                        $ws->push($fd, $send);
+                    } else {
+//                    Message::create(['from_id' => $user_id, 'to_id' => $to_id, 'message' => $message]);
+                    }
+                }
             }
-        } elseif ($receive['type'] == 'notice' && $to_fd) {
+        } elseif ($receive['type'] == 'notice' && $to_fd = $this->mapping_get('user', $to_id)) {
             $sb = $user->name . '(' . $user->email . ')';
             // notice: add / accept / reject
             switch ($receive['data']['type']) {
@@ -107,5 +127,10 @@ class SwooleRepository
                 return $v[$key2];
             }
         }
+    }
+
+    private function get_members($ids)
+    {
+        return GroupMember::where('group_id', $ids)->get();
     }
 }

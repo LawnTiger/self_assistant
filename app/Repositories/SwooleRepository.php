@@ -52,7 +52,7 @@ class SwooleRepository
 
             } elseif($receive['data']['type'] == 'group') {
                 $group_member = $this->get_members($to_id);
-                $fds = [];dump($group_member->toArray());
+                $fds = [];
                 foreach ($group_member as $member) {
                     $fds[] = $this->mapping_get('fd', $member->user_id);
                 }

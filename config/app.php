@@ -178,7 +178,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         GrahamCampbell\Markdown\MarkdownServiceProvider::class,
-
+        App\Providers\ResponseServiceProvider::class,
     ],
 
     /*

@@ -2,13 +2,12 @@
 
 namespace App\Http\Requests\Api;
 
-class RegisterRequest extends ApiRequest
+class LoginRequest extends ApiRequest
 {
     public function rules()
     {
         return [
-            'name' => 'bail|required|max:255',
-            'email' => 'required|email|max:255|unique:users',
+            'email' => 'required|email|max:255',
             'password' => 'required|min:6',
         ];
     }

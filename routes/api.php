@@ -13,7 +13,7 @@
 
 // login and register
 Route::post('/register', 'Api\RegisterController@index');
-//Route::get('/login', 'api\LoginController@index');
+Route::post('/login', 'Api\LoginController@index');
 
 Route::group(['middleware' => ['auth:api']], function () {
 

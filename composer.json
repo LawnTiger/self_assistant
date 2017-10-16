@@ -10,7 +10,8 @@
         "graham-campbell/markdown": "^7.1",
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
-        "predis/predis": "^1.1"
+        "predis/predis": "^1.1",
+        "workerman/workerman": "^3.5"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

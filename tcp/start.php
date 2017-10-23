@@ -5,9 +5,9 @@ use Workerman\Worker;
 
 $channel = new Channel\Server('127.0.0.1', 2206);
 
-$worker = new Worker("websocket://0.0.0.0:4000");
+$worker = new Worker("websocket://0.0.0.0:4001");
 $worker->count = 2;
-$tcp = new Worker("tcp://0.0.0.0:4001");
+$tcp = new Worker("tcp://0.0.0.0:4000");
 $tcp->count = 2;
 
 
@@ -21,21 +21,6 @@ $worker->onWorkerStart = function ($worker) {
     });
 };
 
-$worker->onConnect = function ($connection) use ($worker) {
-    echo "workerID: $worker->id  connectionID: $connection->id\n";
-    $connection->send("welcome to fu*king test room\n");
-};
-
-$worker->onMessage = function ($connection, $data) use ($worker) {
-    print("workerID: $worker->id  connectionID: $connection->id Receive: $data \n");
-    Channel\Client::publish('broadcast', $data);
-};
-
-$worker->onClose = function ($connection) {
-    echo "Connection : {$connection->id}  closed\n";
-};
-
-
 // tcp
 $tcp->onWorkerStart = function ($tcp) {
     Channel\Client::connect('127.0.0.1', 2206);
@@ -46,19 +31,30 @@ $tcp->onWorkerStart = function ($tcp) {
     });
 };
 
-$tcp->onConnect = function ($connection) use ($tcp) {
-    echo "workerID: $tcp->id  connectionID: $connection->id\n";
+$worker->onConnect = 'handle_connect';
+$worker->onMessage = 'handle_message';
+$worker->onClose = 'handle_close';
+
+$tcp->onConnect = 'handle_connect';
+$tcp->onMessage = 'handle_message';
+$tcp->onClose = 'handle_close';
+
+function handle_connect($connection)
+{
+    echo "connectionID: $connection->id\n";
     $connection->send("welcome to fu*king test room\n");
-};
+}
 
-$tcp->onMessage = function ($connection, $data) use ($tcp) {
-    print("workerID: $tcp->id  connectionID: $connection->id Receive: $data \n");
+function handle_message($connection, $data)
+{
+    print("connectionID: $connection->id Receive: $data \n");
     Channel\Client::publish('broadcast', $data);
-};
+}
 
-$tcp->onClose = function ($connection) {
+function handle_close($connection)
+{
     echo "Connection : {$connection->id}  closed\n";
-};
+}
 
 
 // Run worker

@@ -16,12 +16,6 @@ class FriendController extends Controller
         return app('jResponse')->success($list);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $user_id = $request->user()->id;
@@ -42,27 +36,15 @@ class FriendController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  App\Http\Requests\Api\FriendUpdateRequest $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(FriendUpdateRequest $request, $id)
     {
         Friend::accept($request->user()->id, $id, $request->type);
         return app('jResponse')->success();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        //
+        Friend::destroy($id);
+        return app('jResponse')->success();
     }
 }

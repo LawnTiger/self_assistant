@@ -12,7 +12,11 @@ class FriendController extends Controller
 {
     public function index(Request $request)
     {
-        $list = Friend::FriendsList($request->user()->id);
+        if (!empty($request->status) && $request->status == 'waiting') {
+            $list = Friend::addList($request->user()->id);
+        } else {
+            $list = Friend::FriendsList($request->user()->id);
+        }
         return app('jResponse')->success($list);
     }
 

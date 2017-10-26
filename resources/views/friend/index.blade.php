@@ -161,8 +161,8 @@
                 for (var i=0;i<response.length;i++)
                 {
                     var add = "email: " + response[i].email + ", nickname: " + response[i].name + "<br>";
-                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].adder_id + '\', 1)">accept</button>';
-                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].adder_id + '\', 2)">reject</button>';
+                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 1)">accept</button>';
+                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 2)">reject</button>';
                     console.log(add);
                     $('.add-list').append(add);
                 }

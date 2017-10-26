@@ -30,7 +30,7 @@ class Friend extends Model
     public static function addList($user_id)
     {
         return self::leftJoin('users', 'users.id', '=', 'friends.user_id')
-            ->select('name', 'email', 'users.id as adder_id')
+            ->select('friends.id', 'users.id as friend_id', 'email', 'name')
             ->where('friend_id', $user_id)
             ->where('status', 0)->get();
     }

@@ -10,7 +10,7 @@ class GroupMember extends Model
 
     public static function get_list($id)
     {
-        return self::where('user_id', $id)->with('group')->get();
+        return self::where('user_id', $id)->with('group')->get(['group_id']);
     }
 
     public function group()

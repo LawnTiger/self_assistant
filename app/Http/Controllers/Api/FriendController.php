@@ -42,9 +42,15 @@ class FriendController extends Controller
         return app('jResponse')->success();
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        Friend::destroy($id);
-        return app('jResponse')->success();
+        $friend = Friend::where('user_id', $request->user()->id)
+            ->where('friend_id', $id)->first();
+        if ($friend) {
+            $friend->delete();
+            return app('jResponse')->success();
+        } else {
+            return app('jResponse')->error('the id is invalid');
+        }
     }
 }

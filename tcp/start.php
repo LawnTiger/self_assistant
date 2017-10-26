@@ -69,7 +69,7 @@ function handle_message($connection, $data)
 {
     print("connectionID: $connection->id Receive: $data \n");
     $connection->lastMessageTime = time();
-    Channel\Client::publish('broadcast', $data);
+    Channel\Client::publish('broadcast', $data . "\n");
 }
 
 function handle_close($connection)

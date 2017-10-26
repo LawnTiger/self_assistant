@@ -18,7 +18,7 @@ class GroupController extends Controller
     public function store(Request $request)
     {
         $group = Group::create(['name' => $request->name]);
-        GroupMember::create(['group_id' => $group->id, 'user_id' => \Auth::id()]);
+        GroupMember::create(['group_id' => $group->id, 'user_id' => $request->user()->id]);
     }
 
     public function update(Request $request)

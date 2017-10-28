@@ -25,7 +25,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'api_token', 'inner_password'
+        'password', 'remember_token', 'api_token', 'inner_password', 'created_at', 'updated_at'
     ];
 
     public static function resetpwd($id, $oldWord, $newWord)

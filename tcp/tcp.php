@@ -26,11 +26,10 @@ $tcp->onWorkerStart = function ($tcp) {
 
     // 订阅 p2p 事件并注册事件处理函数
     Channel\Client::on('p2p', function ($event_data) use ($tcp) {
-        echo "p2p";
         $to_connection_id = $event_data['to_connection_id'];
+        $to_worker_id = $event_data['to_worker_id'];
         $message = $event_data['content'];
-        if (!isset($tcp->connections[$to_connection_id])) {
-            echo "connection not exists\n";
+        if ($to_worker_id != $tcp->id || !isset($tcp->connections[$to_connection_id])) {
             return;
         }
         $to_connection = $tcp->connections[$to_connection_id];
@@ -77,13 +76,19 @@ function handle_message($connection, $data)
     if ($data['code'] == 'init') {
         $mapping[] = ['user' => $data['data']['id'], 'worker' => $tcp->id, 'connection' => $connection->id];
     } elseif ($data['code'] == 'msg') {
-        $to_connection_id = $data['connect'];
-        $content = $data['content'];
+        $id = $data['data']['id'];
+        $map = mapping(['id' => $id]);
+        if (! empty($map)) {
+            $to_worker_id = $map['worker'];
+            $to_connection_id = $map['connection'];
+            $content = $data['data']['content']['body'];
 
-        Channel\Client::publish('p2p', array(
-            'to_connection_id' => $to_connection_id,
-            'content'          => $content
-        ));
+            Channel\Client::publish('p2p', array(
+                'to_worker_id'     => $to_worker_id,
+                'to_connection_id' => $to_connection_id,
+                'content'          => $content
+            ));
+        }
     }
     print_r($mapping);
 }
@@ -103,6 +108,17 @@ function handle_close($connection)
     print_r($mapping);
 }
 
+function mapping($select)
+{
+    global $mapping;
+    if (array_has($select, 'id')) {
+        foreach ($mapping as $item) {
+            if ($item['user'] == $select['id']) {
+                return $item;
+            }
+        }
+    }
+}
 
 // Run worker
 Worker::runAll();

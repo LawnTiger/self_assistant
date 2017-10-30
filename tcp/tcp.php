@@ -11,11 +11,13 @@ $channel = new Channel\Server('127.0.0.1', 2206);
 
 $tcp = new Worker("tcp://0.0.0.0:4000");
 $tcp->count = 1;
-
+$mapping = [];
 
 // tcp
 $tcp->onWorkerStart = function ($tcp) {
     Channel\Client::connect('127.0.0.1', 2206);
+    global $mapping;
+
     Channel\Client::on('broadcast', function ($event_data) use ($tcp) {
         foreach ($tcp->connections as $con) {
             $con->send($event_data);
@@ -65,20 +67,40 @@ function handle_connect($connection)
 
 function handle_message($connection, $data)
 {
-    print("connectionID: $connection->id Receive: $data \n");
+    global $mapping;
+    global $tcp;
+
+    print("worker: $tcp->id; connection: $connection->id Receive: $data \n");
     $connection->lastMessageTime = time();
-    $data = json_decode($data, true);print_r($data);
-    $to_connection_id = $data['connect'];
-    $content = $data['content'];
-    Channel\Client::publish('p2p', array(
-        'to_connection_id' => $to_connection_id,
-        'content'          => $content
-    ));
+
+    $data = json_decode($data, true);
+    if ($data['code'] == 'init') {
+        $mapping[] = ['user' => $data['data']['id'], 'worker' => $tcp->id, 'connection' => $connection->id];
+    } elseif ($data['code'] == 'msg') {
+        $to_connection_id = $data['connect'];
+        $content = $data['content'];
+
+        Channel\Client::publish('p2p', array(
+            'to_connection_id' => $to_connection_id,
+            'content'          => $content
+        ));
+    }
+    print_r($mapping);
 }
 
 function handle_close($connection)
 {
+    global $mapping;
+    global $tcp;
+
     echo "Connection : {$connection->id}  closed\n";
+
+    foreach ($mapping as $key => $item) {
+        if ($item['worker'] == $tcp->id && $item['connection'] == $connection->id) {
+            unset($mapping[$key]);
+        }
+    }
+    print_r($mapping);
 }
 
 

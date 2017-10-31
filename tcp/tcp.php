@@ -30,7 +30,7 @@ $tcp->onWorkerStart = function ($tcp) {
         $message = $event_data['content'];
         if (!isset($tcp->connections[$to_connection_id])) {
             echo 'error connect id' . $to_connection_id;
-            return ;
+            return;
         }
         $tcp->connections[$to_connection_id]->send($message);
     });
@@ -79,14 +79,57 @@ function handle_message($connection, $data)
             'connection' => $connection->id))
             ->query();
     } elseif ($data['code'] == 'msg') {
-        $id = $data['data']['id'];
-        $map = $db->select('*')->from('socket_mapping')->where("user_id=$id")->row();var_dump($map);
-        if (!empty($map)) {
-            Channel\Client::publish('p2p-' . $map['worker'], array(
-                'connection' => $map['connection'],
-                'content' => $data['data']['content']['body']
-            ));
+        if ($data['data']['chatType'] == 'p2p') {
+            $id = $data['data']['id'];
+            $map = $db->select('*')->from('socket_mapping')->where("user_id=$id")->row();
+            $from = $db->select('*')->from('socket_mapping')->where("worker=$tcp->id and connection=$connection->id")->row();
+            $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
+            if (!empty($map)) {
+                $content = array(
+                    'code' => 'msg',
+                    'data' => array(
+                        'groupId' => 0,
+                        'userId' => $from['user_id'],
+                        'userName' => $user_name,
+                        'content' => array(
+                            'contentType' => 'txt',
+                            'body' => $data['data']['content']['body']
+                        )
+                    )
+                );
+                Channel\Client::publish('p2p-' . $map['worker'], array(
+                    'connection' => $map['connection'],
+                    'content' => json_encode($content)
+                ));
+            }
+        } elseif ($data['data']['chatType'] == 'group') {
+            $group_id = $data['data']['id'];
+            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();print_r($members);
+            foreach ($members as $id) {
+                $map = $db->select('*')->from('socket_mapping')->where("user_id=$id")->row();
+                $from = $db->select('*')->from('socket_mapping')->where("worker=$tcp->id and connection=$connection->id")->row();
+                $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
+                if (!empty($map)) {
+                    $content = array(
+                        'code' => 'msg',
+                        'data' => array(
+                            'groupId' => 0,
+                            'userId' => $from['user_id'],
+                            'userName' => $user_name,
+                            'content' => array(
+                                'contentType' => 'txt',
+                                'body' => $data['data']['content']['body']
+                            )
+                        )
+                    );
+                    Channel\Client::publish('p2p-' . $map['worker'], array(
+                        'connection' => $map['connection'],
+                        'content' => json_encode($content)
+                    ));
+                }
+            }
         }
+
     }
 }
 

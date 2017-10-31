@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7c4371b300cd6ca12d7fb05a987dab26",
-    "content-hash": "f2a7c0df0e7a25bd0e19c73c69fda93f",
+    "hash": "1e423416594caf25497b5fd7689c6c97",
+    "content-hash": "32dc735af01f400cb5d98987e5e574e7",
     "packages": [
         {
             "name": "barryvdh/laravel-ide-helper",
@@ -2244,6 +2244,74 @@
             ],
             "homepage": "http://www.workerman.net",
             "time": "2016-04-07 07:26:43"
+        },
+        {
+            "name": "workerman/globaldata",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/walkor/GlobalData.git",
+                "reference": "ea3eca7b351693b4fb8580e7b351f12dd28c78fe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://files.phpcomposer.com/files/walkor/GlobalData/ea3eca7b351693b4fb8580e7b351f12dd28c78fe.zip",
+                "reference": "ea3eca7b351693b4fb8580e7b351f12dd28c78fe",
+                "shasum": ""
+            },
+            "require": {
+                "workerman/workerman": ">=3.3.0"
+            },
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "GlobalData\\": "./src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "homepage": "http://www.workerman.net",
+            "time": "2016-06-02 06:35:44"
+        },
+        {
+            "name": "workerman/mysql",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/walkor/mysql.git",
+                "reference": "745d62528372e0ca7f1be05f029493b9fce2dc76"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://files.phpcomposer.com/files/walkor/mysql/745d62528372e0ca7f1be05f029493b9fce2dc76.zip",
+                "reference": "745d62528372e0ca7f1be05f029493b9fce2dc76",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pdo": "*",
+                "ext-pdo_mysql": "*",
+                "php": ">=5.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Workerman\\MySQL\\": "./src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Long-living MySQL connection for daemon.",
+            "homepage": "http://www.workerman.net",
+            "keywords": [
+                "mysql",
+                "pdo",
+                "pdo_mysql"
+            ],
+            "time": "2017-03-18 01:48:33"
         },
         {
             "name": "workerman/workerman",

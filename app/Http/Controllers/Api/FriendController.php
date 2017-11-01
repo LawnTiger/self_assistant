@@ -50,9 +50,12 @@ class FriendController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $friend = Friend::where('user_id', $request->user()->id)
+        $friend1 = Friend::where('user_id', $request->user()->id)
             ->where('friend_id', $id)->first();
-        if ($friend) {
+        $friend2 = Friend::where('friend_id', $request->user()->id)
+            ->where('user_id', $id)->first();
+        if ($friend1 || $friend2) {
+            $friend = empty($friend1) ? $friend2 : $friend1;
             $friend->delete();
             return app('jResponse')->success();
         } else {

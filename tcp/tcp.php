@@ -10,7 +10,7 @@ define('HEARTBEAT_TIME', 220);
 $channel = new Channel\Server('127.0.0.1', 2206);
 
 $tcp = new Worker("tcp://0.0.0.0:4000");
-$tcp->count = 1;
+$tcp->count = 2;
 
 // tcp
 $tcp->onWorkerStart = function ($tcp) {
@@ -20,7 +20,7 @@ $tcp->onWorkerStart = function ($tcp) {
 
     Channel\Client::on('broadcast', function ($event_data) use ($tcp) {
         foreach ($tcp->connections as $con) {
-            $con->send($event_data);
+            $con->send($event_data . "\n");
         }
     });
 
@@ -32,7 +32,7 @@ $tcp->onWorkerStart = function ($tcp) {
             echo 'error connect id' . $to_connection_id;
             return;
         }
-        $tcp->connections[$to_connection_id]->send($message);
+        $tcp->connections[$to_connection_id]->send($message . "\n");
     });
 
 
@@ -68,10 +68,20 @@ function handle_message($connection, $data)
     global $tcp;
     global $db;
 
-    print("worker: $tcp->id; connection: $connection->id Receive: $data \n");
+    print("worker: $tcp->id, connection: $connection->id Receive: $data \n");
     $connection->lastMessageTime = time();
+    if ($data != '{"code":"ping"}') {
+        $connection->send(json_encode(['code'=>'response','data'=>'success']) . "\n");
+    }
 
-    $data = json_decode($data, true);
+    try {
+        $data = json_decode($data, true);
+    } catch (Exception $exception) {
+        echo "not a json \n";
+        $connection->send("not a json \n");
+        return;
+    }
+
     if ($data['code'] == 'init') {
         $db->insert('socket_mapping')->cols(array(
             'user_id' => $data['data']['id'],
@@ -88,9 +98,11 @@ function handle_message($connection, $data)
                 $content = array(
                     'code' => 'msg',
                     'data' => array(
+                        'chatType' => 'p2p',
                         'groupId' => 0,
                         'userId' => $from['user_id'],
                         'userName' => $user_name,
+                        'groupName' => '',
                         'content' => array(
                             'contentType' => 'txt',
                             'body' => $data['data']['content']['body']
@@ -104,18 +116,21 @@ function handle_message($connection, $data)
             }
         } elseif ($data['data']['chatType'] == 'group') {
             $group_id = $data['data']['id'];
-            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();print_r($members);
+            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
             foreach ($members as $id) {
                 $map = $db->select('*')->from('socket_mapping')->where("user_id=$id")->row();
                 $from = $db->select('*')->from('socket_mapping')->where("worker=$tcp->id and connection=$connection->id")->row();
                 $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
+                $group_name = $db->select('name')->from('groups')->where("id={$data['data']['id']}")->single();
                 if (!empty($map)) {
                     $content = array(
                         'code' => 'msg',
                         'data' => array(
+                            'chatType' => 'group',
                             'groupId' => 0,
                             'userId' => $from['user_id'],
                             'userName' => $user_name,
+                            'groupName' => $group_name,
                             'content' => array(
                                 'contentType' => 'txt',
                                 'body' => $data['data']['content']['body']
@@ -128,6 +143,8 @@ function handle_message($connection, $data)
                     ));
                 }
             }
+        } else {
+            $connection->send("invalid code\n");
         }
 
     }

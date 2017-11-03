@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once 'config.php';
 
 use Workerman\Worker;
 use Workerman\Lib\Timer;
@@ -15,10 +16,11 @@ $ws = new Worker("websocket://0.0.0.0:4001");
 $ws->count = 2;
 
 // websocket
-$ws->onWorkerStart = function ($ws) {
+$ws->onWorkerStart = function ($ws) use ($config) {
     Channel\Client::connect('127.0.0.1', 2206);
     global $db;
-    $db = new Workerman\MySQL\Connection();
+    $db_config = $config['database'];
+    $db = new Workerman\MySQL\Connection($db_config['host'], $db_config['port'], $db_config['name'], $db_config['psw'], $db_config['db']);
 
     Channel\Client::on('broadcast', function ($event_data) use ($ws) {
         foreach ($ws->connections as $con) {
@@ -39,10 +41,11 @@ $ws->onWorkerStart = function ($ws) {
 };
 
 // tcp
-$tcp->onWorkerStart = function ($tcp) {
+$tcp->onWorkerStart = function ($tcp) use ($config) {
     Channel\Client::connect('127.0.0.1', 2206);
     global $db;
-    $db = new Workerman\MySQL\Connection();
+    $db_config = $config['database'];
+    $db = new Workerman\MySQL\Connection($db_config['host'], $db_config['port'], $db_config['name'], $db_config['psw'], $db_config['db']);
 
     Channel\Client::on('broadcast', function ($event_data) use ($tcp) {
         foreach ($tcp->connections as $con) {

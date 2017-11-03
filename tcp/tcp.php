@@ -70,9 +70,6 @@ function handle_message($connection, $data)
 
     print("worker: $tcp->id, connection: $connection->id Receive: $data \n");
     $connection->lastMessageTime = time();
-    if ($data != '{"code":"ping"}') {
-        $connection->send(json_encode(['code'=>'response','data'=>'success']) . "\n");
-    }
 
     try {
         $data = json_decode($data, true);
@@ -88,6 +85,7 @@ function handle_message($connection, $data)
             'worker' => $tcp->id,
             'connection' => $connection->id))
             ->query();
+        $connection->send(json_encode(['code'=>'response','data'=>'success']) . "\n");
     } elseif ($data['code'] == 'msg') {
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
@@ -114,6 +112,7 @@ function handle_message($connection, $data)
                     'content' => json_encode($content)
                 ));
             }
+            $connection->send(json_encode(['code'=>'response','data'=>'success']) . "\n");
         } elseif ($data['data']['chatType'] == 'group') {
             $group_id = $data['data']['id'];
             $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
@@ -143,6 +142,7 @@ function handle_message($connection, $data)
                     ));
                 }
             }
+            $connection->send(json_encode(['code'=>'response','data'=>'success']) . "\n");
         } else {
             $connection->send("invalid code\n");
         }

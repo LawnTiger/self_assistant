@@ -15,6 +15,7 @@ class CreateSocketMappingTable extends Migration
     {
         Schema::create('socket_mapping', function (Blueprint $table) {
             $table->bigInteger('user_id');
+            $table->tinyInteger('type')->comment('1-tcp, 2-websocket');
             $table->integer('worker');
             $table->integer('connection');
         });

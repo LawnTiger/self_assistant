@@ -13,3 +13,4 @@ config/ide-helper.php
 resources/views/vendor/
 /temp
 /app/Notifications/InvoicePaid.php
+/tcp/socket.modify.php

@@ -82,8 +82,8 @@ $tcp->onWorkerStart = function ($tcp) use ($config) {
 
 
 $tcp->onConnect = function ($connection) use ($tcp) {
-    echo "CONNECT: tcp -- $tcp->id -- $connection->id  \n";
-    $connection->send("welcome to fu*king chat room\n");
+    echo "CONNECT: tcp -- $tcp->id -- $connection->id \n";
+    $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
 };
 
 $tcp->onMessage = function ($connection, $data) use ($tcp) {

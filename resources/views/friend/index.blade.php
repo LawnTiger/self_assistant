@@ -77,12 +77,12 @@
 
 @section('script')
 <script>
-    var ws = new WebSocket("ws://192.168.10.10:9501");
+    var ws = new WebSocket("ws://59.110.136.203:4001");
 
     ws.onopen = function()
     {
         // Web Socket 已连接上，使用 send() 方法发送数据
-        var data = JSON.stringify({'type': 'init', 'data': {'id': '{{ \Auth::id() }}'}});
+        var data = JSON.stringify({'code': 'init', 'data': {'id': '{{ \Auth::id() }}'}});
         ws.send(data);
         console.log("连接开启...");
     };
@@ -91,8 +91,8 @@
     {
         console.log(evt.data);
         var recieve = JSON.parse(evt.data);
-        if (recieve.type == 'chat') {
-            $('.chat-content').append(recieve.data.name + ' : ' + recieve.data.msg + '<br>');
+        if (recieve.data.chatType == 'p2p') {
+            $('.chat-content').append(recieve.data.userName + ' : ' + recieve.data.content.body + '<br>');
         } else if(recieve.type == 'group') {
             $('.group-content').append(recieve.data.name + ' : ' + recieve.data.msg + '<br>');
         } else if (recieve.type == 'notice') {
@@ -196,7 +196,7 @@
             function(result) {
                 if (result.status == 1) {
                     var data = JSON.stringify({'type': 'notice', 'data': {'type': 'add', 'to': result.data.id}});
-                    ws.send(data);
+//                    ws.send(data);
                 }
                 alert(result.data.message);
             }
@@ -252,10 +252,12 @@
             var select_send = '.chat-send';
             var select_content = '.send-content';
             var select_show = '.chat-content';
+            var select_type = 'p2p';
         } else {
             var select_send = '.group-send';
             var select_content = '.group-send-content';
             var select_show = '.group-content';
+            var select_type = 'group';
         }
         var id = $(select_send).attr('data-id');
         if (id == undefined) {
@@ -269,6 +271,7 @@
         }
         var name = $(select_send).attr('data-name');
         var data = JSON.stringify({'type': 'chat', 'data': {'to': id, 'msg': content, 'type': type}});
+        var data = JSON.stringify({"code": "msg", "data": {"chatType": select_type, "id": id, "content": {"contentType": "txt", "body": content}}});
         ws.send(data);
         console.log(data);
         $(select_show).append('<span class="blue">to ' + name + ' : ' + content + '</span><br>');

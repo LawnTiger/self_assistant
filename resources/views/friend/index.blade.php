@@ -93,8 +93,8 @@
         var recieve = JSON.parse(evt.data);
         if (recieve.data.chatType == 'p2p') {
             $('.chat-content').append(recieve.data.userName + ' : ' + recieve.data.content.body + '<br>');
-        } else if(recieve.type == 'group') {
-            $('.group-content').append(recieve.data.name + ' : ' + recieve.data.msg + '<br>');
+        } else if(recieve.data.chatType == 'group') {
+            $('.group-content').append(recieve.data.groupName + ' : ' + recieve.data.content.body + '<br>');
         } else if (recieve.type == 'notice') {
             alert(recieve.data.notice);
             if (recieve.data.type == 'add') {

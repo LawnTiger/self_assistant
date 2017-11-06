@@ -101,6 +101,7 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
     }
 
     if ($data['code'] == 'init') {
+        $db->delete('socket_mapping')->where("type=1 and user_id={$data['data']['id']}")->query();
         $db->insert('socket_mapping')->cols(array(
             'type' => 1,
             'user_id' => $data['data']['id'],
@@ -195,7 +196,6 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
     global $db;
 
     print("MSG: ws -- $ws->id -- $connection->id -- $data \n");
-    $connection->lastMessageTime = time();
 
     $data = json_decode($data, true);
     if (!is_array($data)) {
@@ -205,6 +205,7 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
     }
 
     if ($data['code'] == 'init') {
+        $db->delete('socket_mapping')->where("type=2 and user_id={$data['data']['id']}")->query();
         $db->insert('socket_mapping')->cols(array(
             'type' => 2,
             'user_id' => $data['data']['id'],
@@ -267,7 +268,7 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
                                 )
                             )
                         );
-                        Channel\Client::publish($type . 'ws-p2p-' . $map['worker'], array(
+                        Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                             'connection' => $map['connection'],
                             'content' => json_encode($content)
                         ));

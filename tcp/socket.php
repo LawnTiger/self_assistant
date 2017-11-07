@@ -126,6 +126,7 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
                             'userId' => $from['user_id'],
                             'userName' => $user_name,
                             'groupName' => '',
+                            'time' => $data['data']['time'],
                             'content' => array(
                                 'contentType' => 'txt',
                                 'body' => $data['data']['content']['body']
@@ -158,6 +159,7 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
                                 'userId' => $from['user_id'],
                                 'userName' => $user_name,
                                 'groupName' => $group_name,
+                                'time' => $data['data']['time'],
                                 'content' => array(
                                     'contentType' => 'txt',
                                     'body' => $data['data']['content']['body']
@@ -189,7 +191,7 @@ $tcp->onClose = function ($connection) use ($tcp) {
 
 $ws->onConnect = function ($connection) use ($ws) {
     echo "CONNECT: ws -- $ws->id -- $connection->id \n";
-    $connection->send("welcome to fu*king chat room\n");
+    $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
 };
 
 $ws->onMessage = function ($connection, $data) use ($ws) {
@@ -230,6 +232,7 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
                             'userId' => $from['user_id'],
                             'userName' => $user_name,
                             'groupName' => '',
+                            'time' => $data['data']['time'],
                             'content' => array(
                                 'contentType' => 'txt',
                                 'body' => $data['data']['content']['body']
@@ -262,6 +265,7 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
                                 'userId' => $from['user_id'],
                                 'userName' => $user_name,
                                 'groupName' => $group_name,
+                                'time' => $data['data']['time'],
                                 'content' => array(
                                     'contentType' => 'txt',
                                     'body' => $data['data']['content']['body']

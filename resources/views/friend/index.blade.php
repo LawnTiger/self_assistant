@@ -271,7 +271,7 @@
         }
         var name = $(select_send).attr('data-name');
         var data = JSON.stringify({'type': 'chat', 'data': {'to': id, 'msg': content, 'type': type}});
-        var data = JSON.stringify({"code": "msg", "data": {"chatType": select_type, "id": id, "content": {"contentType": "txt", "body": content}}});
+        var data = JSON.stringify({"code": "msg", "data": {"chatType": select_type, "id": id, "time": (Date.parse(new Date())/1000), "content": {"contentType": "txt", "body": content}}});
         ws.send(data);
         console.log(data);
         $(select_show).append('<span class="blue">to ' + name + ' : ' + content + '</span><br>');

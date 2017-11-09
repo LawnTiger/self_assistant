@@ -95,11 +95,11 @@
             $('.chat-content').append(recieve.data.userName + ' : ' + recieve.data.content.body + '<br>');
         } else if(recieve.data.chatType == 'group') {
             $('.group-content').append(recieve.data.groupName + ' : ' + recieve.data.content.body + '<br>');
-        } else if (recieve.type == 'notice') {
-            alert(recieve.data.notice);
-            if (recieve.data.type == 'add') {
+        } else if (recieve.code == 'notice') {
+            if (recieve.data.type == 'addFriend') {
+                alert('somebody add you');
                 add_notice();
-            } else if (recieve.data.type == 'accept') {
+            } else if (recieve.data.type == 'responseFriend') {
                 refresh_friends();
             }
         }
@@ -195,8 +195,10 @@
         $.post("{{ action('FriendController@store') }}", {'email': email},
             function(result) {
                 if (result.status == 1) {
-                    var data = JSON.stringify({'type': 'notice', 'data': {'type': 'add', 'to': result.data.id}});
-//                    ws.send(data);
+                    var data = JSON.stringify(
+                        {'code': 'notice', 'data':
+                            {'type': 'addFriend', 'id': result.data.id, 'content': 'fuck', 'time': (Date.parse(new Date())/1000)}});
+                    ws.send(data);
                 }
                 alert(result.data.message);
             }

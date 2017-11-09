@@ -177,7 +177,34 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
         } else {
             $connection->send("invalid code\n");
         }
+    } elseif ($data['code'] == 'notice') {
+        $from = $db->select('*')->from('socket_mapping')->where("type=1 and worker=$tcp->id and connection=$connection->id")->row();
+        $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
+        $id = $data['data']['id'];
+        if ($data['data']['type'] == 'addFriend') {
+            $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query();
+            if ($maps) {
+                foreach ($maps as $map) {
+                    $type = $map['type'] == 1 ? 'tcp' : 'ws';
+                    $content = array(
+                        'code' => 'notice',
+                        'data' => array(
+                            'type' => 'addFriend',
+                            'id' => $from['user_id'],
+                            'name' => $user_name,
+                            'time' => $data['data']['time'],
+                            'content' => $data['data']['time']
+                        )
+                    );
+                    Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
+                        'connection' => $map['connection'],
+                        'content' => json_encode($content)
+                    ));
+                }
+            }
+        } elseif ($data['data']['type'] == 'responseFriend') {
 
+        }
     }
 };
 
@@ -283,7 +310,34 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
         } else {
             $connection->send("invalid code\n");
         }
+    } elseif ($data['code'] == 'notice') {
+        $from = $db->select('*')->from('socket_mapping')->where("type=2 and worker=$ws->id and connection=$connection->id")->row();
+        $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
+        $id = $data['data']['id'];print_r('TEST: '. $id);
+        if ($data['data']['type'] == 'addFriend') {
+            $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query();
+            if ($maps) {
+                foreach ($maps as $map) {
+                    $type = $map['type'] == 1 ? 'tcp' : 'ws';
+                    $content = array(
+                        'code' => 'notice',
+                        'data' => array(
+                            'type' => 'addFriend',
+                            'id' => $from['user_id'],
+                            'name' => $user_name,
+                            'time' => $data['data']['time'],
+                            'content' => $data['data']['content']
+                        )
+                    );
+                    Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
+                        'connection' => $map['connection'],
+                        'content' => json_encode($content)
+                    ));
+                }
+            }
+        } elseif ($data['data']['type'] == 'responseFriend') {
 
+        }
     }
 };
 

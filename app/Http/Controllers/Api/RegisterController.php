@@ -18,6 +18,6 @@ class RegisterController extends Controller
             'api_token' => $token->genToken(),
         ]);
 
-        return app('response')->success($user);
+        return app('jResponse')->success($user);
     }
 }

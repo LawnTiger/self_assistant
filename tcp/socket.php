@@ -133,7 +133,7 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
                             )
                         )
                     );
-                    Channel\Client::publish($type . '-tcp-p2p-' . $map['worker'], array(
+                    Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
                     ));

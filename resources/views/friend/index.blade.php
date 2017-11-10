@@ -100,6 +100,12 @@
                 alert('somebody add you');
                 add_notice();
             } else if (recieve.data.type == 'responseFriend') {
+                if (recieve.data.isAccept == 1) {
+                    var msg = recieve.data.name + ' accept you';
+                } else {
+                    var msg = recieve.data.name + ' reject you';
+                }
+                alert(msg);
                 refresh_friends();
             }
         }
@@ -224,9 +230,11 @@
         var param = {'_method': 'PUT', 'type': type};
         $.post(url, param, function(result) {
             if (type == 2) {
-                var data = {'type': 'notice', 'data': {'type':'reject', 'to': id}};
+                var data = {'code': 'notice', 'data':
+                    {'type': 'responseFriend', 'isAccept': 0, 'id': id, 'content': 'fuck', 'time': (Date.parse(new Date())/1000)}};
             } else if (type == 1) {
-                var data = {'type': 'notice', 'data': {'type':'accept', 'to': id}};
+                var data = {'code': 'notice', 'data':
+                    {'type': 'responseFriend', 'isAccept': 1, 'id': id, 'content': 'fuck', 'time': (Date.parse(new Date())/1000)}};
             }
             ws.send(JSON.stringify(data));
             alert(result.message);

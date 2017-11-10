@@ -203,7 +203,25 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
                 }
             }
         } elseif ($data['data']['type'] == 'responseFriend') {
-
+            $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+            foreach ($maps as $map) {
+                $type = $map['type'] == 1 ? 'tcp' : 'ws';
+                $content = array(
+                    'code' => 'notice',
+                    'data' => array(
+                        'type' => 'responseFriend',
+                        'isAccept' => $data['data']['isAccept'],
+                        'id' => $from['user_id'],
+                        'name' => $user_name,
+                        'content' => $data['data']['content'],
+                        'time' => $data['data']['time'],
+                    )
+                );
+                Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
+                    'connection' => $map['connection'],
+                    'content' => json_encode($content)
+                ));
+            }
         }
     }
 };
@@ -313,7 +331,7 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
     } elseif ($data['code'] == 'notice') {
         $from = $db->select('*')->from('socket_mapping')->where("type=2 and worker=$ws->id and connection=$connection->id")->row();
         $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
-        $id = $data['data']['id'];print_r('TEST: '. $id);
+        $id = $data['data']['id'];
         if ($data['data']['type'] == 'addFriend') {
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query();
             if ($maps) {
@@ -336,7 +354,25 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
                 }
             }
         } elseif ($data['data']['type'] == 'responseFriend') {
-
+            $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+            foreach ($maps as $map) {
+                $type = $map['type'] == 1 ? 'tcp' : 'ws';
+                $content = array(
+                    'code' => 'notice',
+                    'data' => array(
+                        'type' => 'responseFriend',
+                        'isAccept' => $data['data']['isAccept'],
+                        'id' => $from['user_id'],
+                        'name' => $user_name,
+                        'content' => $data['data']['content'],
+                        'time' => $data['data']['time'],
+                    )
+                );
+                Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
+                    'connection' => $map['connection'],
+                    'content' => json_encode($content)
+                ));
+            }
         }
     }
 };

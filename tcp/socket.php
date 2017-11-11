@@ -88,14 +88,14 @@ $tcp->onConnect = function ($connection) {
     $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
 };
 
-$tcp->onMessage = function ($connection, $data) {
+$tcp->onMessage = function ($connection, $message) {
     global $db;
 
-    print("MSG: tcp -- {$connection->worker->id} -- $connection->id -- $data \n");
+    print("MSG: tcp -- {$connection->worker->id} -- $connection->id -- $message \n");
     $connection->lastMessageTime = time();
 
     try {
-        $data = json_decode($data, true);
+        $data = json_decode($message, true);
     } catch (Exception $exception) {
         echo "not a json \n";
         $connection->send("not a json \n");
@@ -110,7 +110,9 @@ $tcp->onMessage = function ($connection, $data) {
             'worker' => $connection->worker->id,
             'connection' => $connection->id))
             ->query();
-        $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
+        $db->select('*')->from('socket_mapping')->where("type=1 and user_id={$data['data']['id']}")->query();
+        $messages = get_message($data['data']['id']);
+        $connection->send(json_encode(['code' => 'response', 'data' => $messages]) . "\n");
     } elseif ($data['code'] == 'msg') {
         $from = $db->select('*')->from('socket_mapping')
             ->where("type=1 and worker={$connection->worker->id} and connection=$connection->id")->row();
@@ -118,48 +120,19 @@ $tcp->onMessage = function ($connection, $data) {
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
-            foreach ($maps as $map) {
-                $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                $content = array(
-                    'code' => 'msg',
-                    'data' => array(
-                        'chatType' => 'p2p',
-                        'groupId' => 0,
-                        'userId' => $from['user_id'],
-                        'userName' => $user_name,
-                        'groupName' => '',
-                        'time' => $data['data']['time'],
-                        'content' => array(
-                            'contentType' => 'txt',
-                            'body' => $data['data']['content']['body']
-                        )
-                    )
-                );
-                Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
-                    'connection' => $map['connection'],
-                    'content' => json_encode($content)
-                ));
-            }
-            $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
-        } elseif ($data['data']['chatType'] == 'group') {
-            $group_id = $data['data']['id'];
-            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
-            foreach ($members as $id) {
-                $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
-                $group_name = $db->select('name')->from('groups')->where("id={$data['data']['id']}")->single();
+            if (empty($maps)) {
+                save_message($id, $message);
+            } else {
                 foreach ($maps as $map) {
-                    if ($map['user_id'] == $from['user_id']) {
-                        continue ;
-                    }
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
                     $content = array(
                         'code' => 'msg',
                         'data' => array(
-                            'chatType' => 'group',
-                            'groupId' => $group_id,
+                            'chatType' => 'p2p',
+                            'groupId' => 0,
                             'userId' => $from['user_id'],
                             'userName' => $user_name,
-                            'groupName' => $group_name,
+                            'groupName' => '',
                             'time' => $data['data']['time'],
                             'content' => array(
                                 'contentType' => 'txt',
@@ -171,6 +144,43 @@ $tcp->onMessage = function ($connection, $data) {
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
                     ));
+                }
+            }
+            $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
+        } elseif ($data['data']['chatType'] == 'group') {
+            $group_id = $data['data']['id'];
+            $group_name = $db->select('name')->from('groups')->where("id={$data['data']['id']}")->single();
+            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
+            foreach ($members as $id) {
+                $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+                if (empty($maps)) {
+                    save_message($id, $message);
+                } else {
+                    foreach ($maps as $map) {
+                        if ($map['user_id'] == $from['user_id']) {
+                            continue;
+                        }
+                        $type = $map['type'] == 1 ? 'tcp' : 'ws';
+                        $content = array(
+                            'code' => 'msg',
+                            'data' => array(
+                                'chatType' => 'group',
+                                'groupId' => $group_id,
+                                'userId' => $from['user_id'],
+                                'userName' => $user_name,
+                                'groupName' => $group_name,
+                                'time' => $data['data']['time'],
+                                'content' => array(
+                                    'contentType' => 'txt',
+                                    'body' => $data['data']['content']['body']
+                                )
+                            )
+                        );
+                        Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
+                            'connection' => $map['connection'],
+                            'content' => json_encode($content)
+                        ));
+                    }
                 }
             }
             $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
@@ -239,12 +249,12 @@ $ws->onConnect = function ($connection) {
     $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
 };
 
-$ws->onMessage = function ($connection, $data) use ($ws) {
+$ws->onMessage = function ($connection, $message) {
     global $db;
 
-    print("MSG: ws -- {$connection->worker->id} -- $connection->id -- $data \n");
+    print("MSG: ws -- {$connection->worker->id} -- $connection->id -- $message \n");
 
-    $data = json_decode($data, true);
+    $data = json_decode($message, true);
     if (!is_array($data)) {
         echo "not a json \n";
         $connection->send("not a json \n");
@@ -267,48 +277,22 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
-            foreach ($maps as $map) {
-                if ($map['user_id'] == $from['user_id']) {
-                    continue ;
-                }
-                $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                $content = array(
-                    'code' => 'msg',
-                    'data' => array(
-                        'chatType' => 'p2p',
-                        'groupId' => 0,
-                        'userId' => $from['user_id'],
-                        'userName' => $user_name,
-                        'groupName' => '',
-                        'time' => $data['data']['time'],
-                        'content' => array(
-                            'contentType' => 'txt',
-                            'body' => $data['data']['content']['body']
-                        )
-                    )
-                );
-                Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
-                    'connection' => $map['connection'],
-                    'content' => json_encode($content)
-                ));
-            }
-            $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
-        } elseif ($data['data']['chatType'] == 'group') {
-            $group_id = $data['data']['id'];
-            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
-            foreach ($members as $id) {
-                $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
-                $group_name = $db->select('name')->from('groups')->where("id={$data['data']['id']}")->single();
+            if (empty($maps)) {
+                save_message($id, $message);
+            } else {
                 foreach ($maps as $map) {
+                    if ($map['user_id'] == $from['user_id']) {
+                        continue;
+                    }
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
                     $content = array(
                         'code' => 'msg',
                         'data' => array(
-                            'chatType' => 'group',
-                            'groupId' => $group_id,
+                            'chatType' => 'p2p',
+                            'groupId' => 0,
                             'userId' => $from['user_id'],
                             'userName' => $user_name,
-                            'groupName' => $group_name,
+                            'groupName' => '',
                             'time' => $data['data']['time'],
                             'content' => array(
                                 'contentType' => 'txt',
@@ -320,6 +304,40 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
                     ));
+                }
+            }
+            $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
+        } elseif ($data['data']['chatType'] == 'group') {
+            $group_id = $data['data']['id'];
+            $group_name = $db->select('name')->from('groups')->where("id={$data['data']['id']}")->single();
+            $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
+            foreach ($members as $id) {
+                $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+                if (empty($maps)) {
+                    save_message($id, $message);
+                } else {
+                    foreach ($maps as $map) {
+                        $type = $map['type'] == 1 ? 'tcp' : 'ws';
+                        $content = array(
+                            'code' => 'msg',
+                            'data' => array(
+                                'chatType' => 'group',
+                                'groupId' => $group_id,
+                                'userId' => $from['user_id'],
+                                'userName' => $user_name,
+                                'groupName' => $group_name,
+                                'time' => $data['data']['time'],
+                                'content' => array(
+                                    'contentType' => 'txt',
+                                    'body' => $data['data']['content']['body']
+                                )
+                            )
+                        );
+                        Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
+                            'connection' => $map['connection'],
+                            'content' => json_encode($content)
+                        ));
+                    }
                 }
             }
             $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
@@ -382,6 +400,20 @@ $ws->onClose = function ($connection) {
     echo "CLOSED: ws -- {$connection->worker->id} -- $connection->id \n";
 };
 
+
+function save_message($id, $message)
+{
+    global $db;
+    $db->insert('socket_msg')->cols(['user_id' => $id, 'msg' => $message])->query();
+}
+
+function get_message($id)
+{
+    global $db;
+    $messages = $db->select('msg')->from('socket_msg')->where("user_id=$id and type=0")->column() ?: [];
+    $db->update('socket_msg')->cols(['type' => 1])->where("user_id=$id")->query();
+    return $messages;
+}
 
 // Run worker
 Worker::runAll();

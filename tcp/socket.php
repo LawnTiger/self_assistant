@@ -6,7 +6,7 @@ use Workerman\Worker;
 use Workerman\Lib\Timer;
 
 // 心跳间隔20秒
-define('HEARTBEAT_TIME', 220);
+define('HEARTBEAT_TIME', 21);
 
 $channel = new Channel\Server('127.0.0.1', 2206);
 

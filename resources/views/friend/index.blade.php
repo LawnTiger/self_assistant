@@ -168,7 +168,7 @@
                 {
                     var add = "email: " + response[i].email + ", nickname: " + response[i].name + "<br>";
                     add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 1)">accept</button>';
-                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 2)">reject</button>';
+                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 0)">reject</button>';
                     console.log(add);
                     $('.add-list').append(add);
                 }
@@ -229,7 +229,7 @@
         var url = "{{ url('friend') }}/" + id;
         var param = {'_method': 'PUT', 'type': type};
         $.post(url, param, function(result) {
-            if (type == 2) {
+            if (type == 0) {
                 var data = {'code': 'notice', 'data':
                     {'type': 'responseFriend', 'isAccept': 0, 'id': id, 'content': 'fuck', 'time': (Date.parse(new Date())/1000)}};
             } else if (type == 1) {

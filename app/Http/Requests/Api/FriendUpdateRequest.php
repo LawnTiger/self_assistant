@@ -22,7 +22,7 @@ class FriendUpdateRequest extends ApiRequest
     public function rules()
     {
         return [
-            'type' => 'required|in:1,2'
+            'type' => 'required|in:0,1'
         ];
     }
 }

@@ -53,8 +53,13 @@ class Friend extends Model
 
     public static function accept($friend_id, $accept_id, $type)
     {
-        $friend = self::where('user_id', $accept_id)->where('friend_id', $friend_id)
-            ->where('status', 0)->update(['status' => $type]);
+        if ($type == 1) {
+            $status = 1;
+        } else {
+            $status = 2;
+        }
+        self::where('user_id', $accept_id)->where('friend_id', $friend_id)
+            ->where('status', 0)->update(['status' => $status]);
     }
 
     public static function eachIds($key)

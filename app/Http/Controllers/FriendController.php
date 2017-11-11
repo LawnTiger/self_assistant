@@ -48,7 +48,7 @@ class FriendController extends Controller
 
     public function update(FriendUpdateRequest $request, $id)
     {
-        Friend::accept(\Auth::id(), $id, $request->type);
+        Friend::accept($request->user()->id, $id, $request->type);
 
         return response()->json(['status' => 1, 'message' => '成功']);
     }

@@ -12,8 +12,10 @@ $channel = new Channel\Server('127.0.0.1', 2206);
 
 $tcp = new Worker("tcp://0.0.0.0:4000");
 $tcp->count = 2;
+$tcp->name = 'tcp';
 $ws = new Worker("websocket://0.0.0.0:4001");
 $ws->count = 2;
+$ws->name = 'ws';
 
 // websocket
 $ws->onWorkerStart = function ($ws) use ($config) {
@@ -81,15 +83,15 @@ $tcp->onWorkerStart = function ($tcp) use ($config) {
 };
 
 
-$tcp->onConnect = function ($connection) use ($tcp) {
-    echo "CONNECT: tcp -- $tcp->id -- $connection->id \n";
+$tcp->onConnect = function ($connection) {
+    echo "CONNECT: tcp -- {$connection->worker->id} -- $connection->id \n";
     $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
 };
 
-$tcp->onMessage = function ($connection, $data) use ($tcp) {
+$tcp->onMessage = function ($connection, $data) {
     global $db;
 
-    print("MSG: tcp -- $tcp->id -- $connection->id -- $data \n");
+    print("MSG: tcp -- {$connection->worker->id} -- $connection->id -- $data \n");
     $connection->lastMessageTime = time();
 
     try {
@@ -105,12 +107,13 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
         $db->insert('socket_mapping')->cols(array(
             'type' => 1,
             'user_id' => $data['data']['id'],
-            'worker' => $tcp->id,
+            'worker' => $connection->worker->id,
             'connection' => $connection->id))
             ->query();
         $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
     } elseif ($data['code'] == 'msg') {
-        $from = $db->select('*')->from('socket_mapping')->where("type=1 and worker=$tcp->id and connection=$connection->id")->row();
+        $from = $db->select('*')->from('socket_mapping')
+            ->where("type=1 and worker={$connection->worker->id} and connection=$connection->id")->row();
         $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
@@ -175,7 +178,8 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
             $connection->send("invalid code\n");
         }
     } elseif ($data['code'] == 'notice') {
-        $from = $db->select('*')->from('socket_mapping')->where("type=1 and worker=$tcp->id and connection=$connection->id")->row();
+        $from = $db->select('*')->from('socket_mapping')
+            ->where("type=1 and worker={$connection->worker->id} and connection=$connection->id")->row();
         $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
         $id = $data['data']['id'];
         if ($data['data']['type'] == 'addFriend') {
@@ -221,23 +225,24 @@ $tcp->onMessage = function ($connection, $data) use ($tcp) {
     }
 };
 
-$tcp->onClose = function ($connection) use ($tcp) {
+$tcp->onClose = function ($connection) {
     global $db;
-    $db->delete('socket_mapping')->where("type=1 and connection=$connection->id and worker=$tcp->id")->query();
+    $db->delete('socket_mapping')
+        ->where("type=1 and connection=$connection->id and worker={$connection->worker->id}")->query();
 
-    echo "CLOSED: tcp -- $tcp->id -- $connection->id \n";
+    echo "CLOSED: tcp -- {$connection->worker->id} -- $connection->id \n";
 };
 
 
-$ws->onConnect = function ($connection) use ($ws) {
-    echo "CONNECT: ws -- $ws->id -- $connection->id \n";
+$ws->onConnect = function ($connection) {
+    echo "CONNECT: ws -- {$connection->worker->id} -- $connection->id \n";
     $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
 };
 
 $ws->onMessage = function ($connection, $data) use ($ws) {
     global $db;
 
-    print("MSG: ws -- $ws->id -- $connection->id -- $data \n");
+    print("MSG: ws -- {$connection->worker->id} -- $connection->id -- $data \n");
 
     $data = json_decode($data, true);
     if (!is_array($data)) {
@@ -251,12 +256,13 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
         $db->insert('socket_mapping')->cols(array(
             'type' => 2,
             'user_id' => $data['data']['id'],
-            'worker' => $ws->id,
+            'worker' => $connection->worker->id,
             'connection' => $connection->id))
             ->query();
         $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
     } elseif ($data['code'] == 'msg') {
-        $from = $db->select('*')->from('socket_mapping')->where("type=2 and worker=$ws->id and connection=$connection->id")->row();
+        $from = $db->select('*')->from('socket_mapping')
+            ->where("type=2 and worker={$connection->worker->id} and connection=$connection->id")->row();
         $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
@@ -321,7 +327,8 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
             $connection->send("invalid code\n");
         }
     } elseif ($data['code'] == 'notice') {
-        $from = $db->select('*')->from('socket_mapping')->where("type=2 and worker=$ws->id and connection=$connection->id")->row();
+        $from = $db->select('*')->from('socket_mapping')
+            ->where("type=2 and worker={$connection->worker->id} and connection=$connection->id")->row();
         $user_name = $db->select('name')->from('users')->where("id={$from['user_id']}")->single();
         $id = $data['data']['id'];
         if ($data['data']['type'] == 'addFriend') {
@@ -367,11 +374,12 @@ $ws->onMessage = function ($connection, $data) use ($ws) {
     }
 };
 
-$ws->onClose = function ($connection) use ($ws) {
+$ws->onClose = function ($connection) {
     global $db;
-    $db->delete('socket_mapping')->where("type=2 and connection=$connection->id and worker=$ws->id")->query();
+    $db->delete('socket_mapping')
+        ->where("type=2 and connection=$connection->id and worker={$connection->worker->id}")->query();
 
-    echo "CLOSED: ws -- $ws->id -- $connection->id \n";
+    echo "CLOSED: ws -- {$connection->worker->id} -- $connection->id \n";
 };
 
 

@@ -203,7 +203,7 @@ $tcp->onMessage = function ($connection, $message) {
                         'id' => $from['user_id'],
                         'name' => $user_name,
                         'time' => $data['data']['time'],
-                        'content' => $data['data']['time']
+                        'content' => $data['data']['content']
                     )
                 );
                 Channel\Client::publish($type . '-p2p-' . $map['worker'], array(

@@ -400,6 +400,12 @@ $ws->onClose = function ($connection) {
     echo "CLOSED: ws -- {$connection->worker->id} -- $connection->id \n";
 };
 
+$ws->onWorkerStop = function()
+{
+    global $db;
+    $db->delete('socket_mapping')->where('1=1')->query();
+    echo "Worker stopping...\n";
+};
 
 function save_message($id, $message)
 {

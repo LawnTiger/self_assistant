@@ -103,7 +103,7 @@
                 if (recieve.data.isAccept == 1) {
                     var msg = recieve.data.name + ' accept you';
                 } else {
-                    var msg = recieve.data.name + ' reject you';
+                    var msg = recieve.data.name + ' reject you: ' + recieve.data.content;
                 }
                 alert(msg);
                 refresh_friends();
@@ -167,9 +167,9 @@
                 for (var i=0;i<response.length;i++)
                 {
                     var add = "email: " + response[i].email + ", nickname: " + response[i].name + "<br>";
-                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 1)">accept</button>';
+                    add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 1)">accept</button><br>';
                     add += '<button id="add-friends" onclick="add_friend(\'' + response[i].friend_id + '\', 0)">reject</button>';
-                    console.log(add);
+                    add += ' why: <input id=response' + response[i].friend_id + '>';
                     $('.add-list').append(add);
                 }
             }
@@ -228,13 +228,15 @@
     function add_friend(id, type) {
         var url = "{{ url('friend') }}/" + id;
         var param = {'_method': 'PUT', 'type': type};
+        var content = $('#response' + id).val();
+        console.log(content);
         $.post(url, param, function(result) {
             if (type == 0) {
                 var data = {'code': 'notice', 'data':
-                    {'type': 'responseFriend', 'isAccept': 0, 'id': id, 'content': 'fuck', 'time': (Date.parse(new Date())/1000)}};
+                    {'type': 'responseFriend', 'isAccept': 0, 'id': id, 'content': content, 'time': (Date.parse(new Date())/1000)}};
             } else if (type == 1) {
                 var data = {'code': 'notice', 'data':
-                    {'type': 'responseFriend', 'isAccept': 1, 'id': id, 'content': 'fuck', 'time': (Date.parse(new Date())/1000)}};
+                    {'type': 'responseFriend', 'isAccept': 1, 'id': id, 'content': '', 'time': (Date.parse(new Date())/1000)}};
             }
             ws.send(JSON.stringify(data));
             alert(result.message);

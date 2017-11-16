@@ -11,6 +11,7 @@
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
         "predis/predis": "^1.1",
+        "qiniu/php-sdk": "^7.2",
         "workerman/GlobalData": "^1.0",
         "workerman/channel": "^1.0",
         "workerman/mysql": "^1.0",

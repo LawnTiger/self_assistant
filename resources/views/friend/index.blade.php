@@ -94,7 +94,7 @@
         if (recieve.data.chatType == 'p2p') {
             $('.chat-content').append(recieve.data.userName + ' : ' + recieve.data.content.body + '<br>');
         } else if(recieve.data.chatType == 'group') {
-            $('.group-content').append(recieve.data.groupName + ' : ' + recieve.data.content.body + '<br>');
+            $('.group-content').append(recieve.data.groupName + ' : ' + recieve.data.userName + ' : ' + recieve.data.content.body + '<br>');
         } else if (recieve.code == 'notice') {
             if (recieve.data.type == 'addFriend') {
                 alert('somebody add you');

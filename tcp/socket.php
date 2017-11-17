@@ -125,21 +125,7 @@ $tcp->onMessage = function ($connection, $message) {
             } else {
                 foreach ($maps as $map) {
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                    $content = array(
-                        'code' => 'msg',
-                        'data' => array(
-                            'chatType' => 'p2p',
-                            'groupId' => 0,
-                            'userId' => $from['user_id'],
-                            'userName' => $user_name,
-                            'groupName' => '',
-                            'time' => $data['data']['time'],
-                            'content' => array(
-                                'contentType' => 'txt',
-                                'body' => $data['data']['content']['body']
-                            )
-                        )
-                    );
+                    $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
                     Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
@@ -161,21 +147,8 @@ $tcp->onMessage = function ($connection, $message) {
                             continue;
                         }
                         $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                        $content = array(
-                            'code' => 'msg',
-                            'data' => array(
-                                'chatType' => 'group',
-                                'groupId' => $group_id,
-                                'userId' => $from['user_id'],
-                                'userName' => $user_name,
-                                'groupName' => $group_name,
-                                'time' => $data['data']['time'],
-                                'content' => array(
-                                    'contentType' => 'txt',
-                                    'body' => $data['data']['content']['body']
-                                )
-                            )
-                        );
+                        $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
+                            $data['data']['content']['body'], $group_id, $group_name);
                         Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                             'connection' => $map['connection'],
                             'content' => json_encode($content)
@@ -196,16 +169,7 @@ $tcp->onMessage = function ($connection, $message) {
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
             foreach ($maps as $map) {
                 $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                $content = array(
-                    'code' => 'notice',
-                    'data' => array(
-                        'type' => 'addFriend',
-                        'id' => $from['user_id'],
-                        'name' => $user_name,
-                        'time' => $data['data']['time'],
-                        'content' => $data['data']['content']
-                    )
-                );
+                $content = Content::notice('addFriend', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']);
                 Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                     'connection' => $map['connection'],
                     'content' => json_encode($content)
@@ -215,17 +179,8 @@ $tcp->onMessage = function ($connection, $message) {
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
             foreach ($maps as $map) {
                 $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                $content = array(
-                    'code' => 'notice',
-                    'data' => array(
-                        'type' => 'responseFriend',
-                        'isAccept' => $data['data']['isAccept'],
-                        'id' => $from['user_id'],
-                        'name' => $user_name,
-                        'content' => $data['data']['content'],
-                        'time' => $data['data']['time'],
-                    )
-                );
+                $content = Content::notice('responseFriend', $from['user_id'], $user_name,
+                    $data['data']['time'], $data['data']['content'], $data['data']['isAccept']);
                 Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                     'connection' => $map['connection'],
                     'content' => json_encode($content)
@@ -285,21 +240,7 @@ $ws->onMessage = function ($connection, $message) {
                         continue;
                     }
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                    $content = array(
-                        'code' => 'msg',
-                        'data' => array(
-                            'chatType' => 'p2p',
-                            'groupId' => 0,
-                            'userId' => $from['user_id'],
-                            'userName' => $user_name,
-                            'groupName' => '',
-                            'time' => $data['data']['time'],
-                            'content' => array(
-                                'contentType' => 'txt',
-                                'body' => $data['data']['content']['body']
-                            )
-                        )
-                    );
+                    $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
                     Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
@@ -317,22 +258,12 @@ $ws->onMessage = function ($connection, $message) {
                     save_message($id, $message);
                 } else {
                     foreach ($maps as $map) {
+                        if ($map['user_id'] == $from['user_id']) {
+                            continue;
+                        }
                         $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                        $content = array(
-                            'code' => 'msg',
-                            'data' => array(
-                                'chatType' => 'group',
-                                'groupId' => $group_id,
-                                'userId' => $from['user_id'],
-                                'userName' => $user_name,
-                                'groupName' => $group_name,
-                                'time' => $data['data']['time'],
-                                'content' => array(
-                                    'contentType' => 'txt',
-                                    'body' => $data['data']['content']['body']
-                                )
-                            )
-                        );
+                        $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
+                            $data['data']['content']['body'], $group_id, $group_name);
                         Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                             'connection' => $map['connection'],
                             'content' => json_encode($content)
@@ -353,16 +284,7 @@ $ws->onMessage = function ($connection, $message) {
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
             foreach ($maps as $map) {
                 $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                $content = array(
-                    'code' => 'notice',
-                    'data' => array(
-                        'type' => 'addFriend',
-                        'id' => $from['user_id'],
-                        'name' => $user_name,
-                        'time' => $data['data']['time'],
-                        'content' => $data['data']['content']
-                    )
-                );
+                $content = Content::notice('addFriend', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']);
                 Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                     'connection' => $map['connection'],
                     'content' => json_encode($content)
@@ -372,17 +294,8 @@ $ws->onMessage = function ($connection, $message) {
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
             foreach ($maps as $map) {
                 $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                $content = array(
-                    'code' => 'notice',
-                    'data' => array(
-                        'type' => 'responseFriend',
-                        'isAccept' => $data['data']['isAccept'],
-                        'id' => $from['user_id'],
-                        'name' => $user_name,
-                        'content' => $data['data']['content'],
-                        'time' => $data['data']['time'],
-                    )
-                );
+                $content = Content::notice('responseFriend', $from['user_id'], $user_name,
+                    $data['data']['time'], $data['data']['content'], $data['data']['isAccept']);
                 Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                     'connection' => $map['connection'],
                     'content' => json_encode($content)

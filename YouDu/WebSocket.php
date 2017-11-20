@@ -46,15 +46,14 @@ class WebSocket
 
     public function onClose($connection)
     {
-        $this->db->delete('socket_mapping')
-            ->where("type=2 and connection=$connection->id and worker={$connection->worker->id}")->query();
+        $this->model->socket_out(2, $connection->worker->id, $connection->id);
 
         echo "CLOSED: ws -- {$connection->worker->id} -- $connection->id \n";
     }
 
     public function onWorkerStop()
     {
-        $this->db->delete('socket_mapping')->where('1=1')->query();
+        $this->model->socket_trancate();
         echo "Worker stopping...\n";
     }
 

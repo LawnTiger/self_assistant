@@ -22,6 +22,17 @@ class Model
             ->query();
     }
 
+    public function socket_out($type, $worker, $connection)
+    {
+        $this->db->delete('socket_mapping')
+            ->where("type=$type and connection=$connection and worker={$worker}")->query();
+    }
+
+    public function socket_trancate()
+    {
+        $this->db->delete('socket_mapping')->where('1=1')->query();
+    }
+
     public function socket_item($type, $worker, $connection)
     {
         return $this->db->select('*')->from('socket_mapping')

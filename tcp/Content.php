@@ -51,7 +51,7 @@ class Content
         self::$notice['data']['content'] = $content;
 
         if ($is_accept) {
-            self::$notice['data']['content'] = $is_accept;
+            self::$notice['data']['isAccept'] = $is_accept;
         }
 
         return self::$notice;

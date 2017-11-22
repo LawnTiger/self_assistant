@@ -120,12 +120,12 @@ $tcp->onMessage = function ($connection, $message) {
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+            $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
             if (empty($maps)) {
-                save_message($id, $message);
+                save_message($id, json_encode($content));
             } else {
                 foreach ($maps as $map) {
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                    $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
                     Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
@@ -139,16 +139,16 @@ $tcp->onMessage = function ($connection, $message) {
             $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
             foreach ($members as $id) {
                 $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+                $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
+                    $data['data']['content']['body'], $group_id, $group_name);
                 if (empty($maps)) {
-                    save_message($id, $message);
+                    save_message($id, json_encode($content));
                 } else {
                     foreach ($maps as $map) {
                         if ($map['user_id'] == $from['user_id']) {
                             continue;
                         }
                         $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                        $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
-                            $data['data']['content']['body'], $group_id, $group_name);
                         Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                             'connection' => $map['connection'],
                             'content' => json_encode($content)
@@ -232,15 +232,15 @@ $ws->onMessage = function ($connection, $message) {
         if ($data['data']['chatType'] == 'p2p') {
             $id = $data['data']['id'];
             $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+            $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
             if (empty($maps)) {
-                save_message($id, $message);
+                save_message($id, json_encode($content));
             } else {
                 foreach ($maps as $map) {
                     if ($map['user_id'] == $from['user_id']) {
                         continue;
                     }
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                    $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
                     Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                         'connection' => $map['connection'],
                         'content' => json_encode($content)
@@ -254,16 +254,16 @@ $ws->onMessage = function ($connection, $message) {
             $members = $db->select('user_id')->from('group_members')->where("group_id=$group_id")->column();
             foreach ($members as $id) {
                 $maps = $db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
+                $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
+                    $data['data']['content']['body'], $group_id, $group_name);
                 if (empty($maps)) {
-                    save_message($id, $message);
+                    save_message($id, json_encode($content));
                 } else {
                     foreach ($maps as $map) {
                         if ($map['user_id'] == $from['user_id']) {
                             continue;
                         }
                         $type = $map['type'] == 1 ? 'tcp' : 'ws';
-                        $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
-                            $data['data']['content']['body'], $group_id, $group_name);
                         Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
                             'connection' => $map['connection'],
                             'content' => json_encode($content)

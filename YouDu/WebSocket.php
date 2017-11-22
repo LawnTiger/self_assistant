@@ -2,40 +2,26 @@
 
 namespace Youdu;
 
-use Workerman\Worker;
-use Workerman\Channel;
 use Workerman\MySQL;
 use Youdu\Tool\Content;
 use Youdu\Tool\Model;
+use Youdu\Tool\Channel;
 
 class WebSocket
 {
     protected $model = null;
+    protected $db = null;
 
     public function onWorkerStart($ws)
     {
         require_once 'Tool/config.php';
         $db_config = $config['database'];
-        $db = new MySQL\Connection($db_config['host'], $db_config['port'], $db_config['name'], $db_config['psw'], $db_config['db']);
-        $this->model = new Model($db);
+        $this->db = new MySQL\Connection($db_config['host'], $db_config['port'], $db_config['name'], $db_config['psw'], $db_config['db']);
+        $this->model = new Model($this->db);
 
-        \Channel\Client::connect('127.0.0.1', 2206);
-        \Channel\Client::on('broadcast', function ($event_data) use ($ws) {
-            foreach ($ws->connections as $con) {
-                $con->send($event_data . "\n");
-            }
-        });
-
-        // 订阅 ws-p2p-id 事件并注册事件处理函数
-        \Channel\Client::on('ws-p2p-' . $ws->id, function ($event_data) use ($ws) {
-            $to_connection_id = $event_data['connection'];
-            $message = $event_data['content'];
-            if (!isset($ws->connections[$to_connection_id])) {
-                echo "ERROR CONNECT: sw -- $ws->id -- $to_connection_id";
-                return;
-            }
-            $ws->connections[$to_connection_id]->send($message . "\n");
-        });
+        Channel::connect();
+        Channel::listen_brocast('broadcast', $ws);
+        Channel::listen_p2p('ws-p2p-' . $ws->id, $ws);
     }
 
     public function onConnect($connection)
@@ -59,13 +45,13 @@ class WebSocket
 
     public function onMessage($connection, $message)
     {
-        print("MSG: ws -- {$connection->worker->id} -- $connection->id -- $message \n");
+        print("MSG: {$connection->worker->name} -- {$connection->worker->id} -- $connection->id -- $message \n");
 
         $data = json_decode($message, true);
         if (!is_array($data)) {
             echo "not a json \n";
-            $connection->send("not a json \n");
-            return;
+            $connection->send(json_encode(['code' => 'error']) . "\n");
+            return ;
         }
 
         if ($data['code'] == 'init') {
@@ -78,7 +64,7 @@ class WebSocket
                 $id = $data['data']['id'];
                 $maps = $this->db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
                 if (empty($maps)) {
-                    save_message($id, $message);
+                    $this->model->socket_msg_save($id, $message);
                 } else {
                     foreach ($maps as $map) {
                         if ($map['user_id'] == $from['user_id']) {
@@ -86,10 +72,7 @@ class WebSocket
                         }
                         $type = $map['type'] == 1 ? 'tcp' : 'ws';
                         $content = Content::msg('p2p', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']['body']);
-                        \Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
-                            'connection' => $map['connection'],
-                            'content' => json_encode($content)
-                        ));
+                        Channel::publish_p2p($type . '-p2p-' . $map['worker'], $map['connection'], $content);
                     }
                 }
                 $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
@@ -100,7 +83,7 @@ class WebSocket
                 foreach ($members as $id) {
                     $maps = $this->db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
                     if (empty($maps)) {
-                        save_message($id, $message);
+                        $this->model->socket_msg_save($id, $message);
                     } else {
                         foreach ($maps as $map) {
                             if ($map['user_id'] == $from['user_id']) {
@@ -109,16 +92,13 @@ class WebSocket
                             $type = $map['type'] == 1 ? 'tcp' : 'ws';
                             $content = Content::msg('group', $from['user_id'], $user_name, $data['data']['time'],
                                 $data['data']['content']['body'], $group_id, $group_name);
-                            \Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
-                                'connection' => $map['connection'],
-                                'content' => json_encode($content)
-                            ));
+                            Channel::publish_p2p($type . '-p2p-' . $map['worker'], $map['connection'], $content);
                         }
                     }
                 }
                 $connection->send(json_encode(['code' => 'response', 'data' => 'success']) . "\n");
             } else {
-                $connection->send("invalid code\n");
+                $connection->send(json_encode(['code' => 'error']) . "\n");
             }
         } elseif ($data['code'] == 'notice') {
             $from = $this->db->select('*')->from('socket_mapping')
@@ -130,10 +110,7 @@ class WebSocket
                 foreach ($maps as $map) {
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
                     $content = Content::notice('addFriend', $from['user_id'], $user_name, $data['data']['time'], $data['data']['content']);
-                    \Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
-                        'connection' => $map['connection'],
-                        'content' => json_encode($content)
-                    ));
+                    Channel::publish_p2p($type . '-p2p-' . $map['worker'], $map['connection'], $content);
                 }
             } elseif ($data['data']['type'] == 'responseFriend') {
                 $maps = $this->db->select('*')->from('socket_mapping')->where("user_id=$id")->query() ?: [];
@@ -141,10 +118,7 @@ class WebSocket
                     $type = $map['type'] == 1 ? 'tcp' : 'ws';
                     $content = Content::notice('responseFriend', $from['user_id'], $user_name,
                         $data['data']['time'], $data['data']['content'], $data['data']['isAccept']);
-                    \Channel\Client::publish($type . '-p2p-' . $map['worker'], array(
-                        'connection' => $map['connection'],
-                        'content' => json_encode($content)
-                    ));
+                    Channel::publish_p2p($type . '-p2p-' . $map['worker'], $map['connection'], $content);
                 }
             }
         }

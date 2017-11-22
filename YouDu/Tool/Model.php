@@ -39,4 +39,8 @@ class Model
             ->where("type={$type} and worker={$worker} and connection={$connection}")->row();
     }
 
+    public function socket_msg_save($id, $message)
+    {
+        $this->db->insert('socket_msg')->cols(['user_id' => $id, 'msg' => $message])->query();
+    }
 }

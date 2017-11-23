@@ -41,6 +41,6 @@ class Model
 
     public function socket_msg_save($id, $message)
     {
-        $this->db->insert('socket_msg')->cols(['user_id' => $id, 'msg' => $message])->query();
+        $this->db->insert('socket_msg')->cols(['user_id' => $id, 'msg' => json_encode($message)])->query();
     }
 }

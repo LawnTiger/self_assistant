@@ -13,6 +13,7 @@ class CreateAdminsTable extends Migration
             $table->string('name', 64);
             $table->string('password');
             $table->string('role')->default('super');
+            $table->rememberToken();
             $table->nullableTimestamps();
 
             $table->unique('name');

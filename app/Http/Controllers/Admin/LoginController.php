@@ -9,19 +9,18 @@ class LoginController extends Controller
 {
     public function getIndex()
     {
+        if (\Auth::guard('admin')->check()) {
+            return redirect()->action('Admin\UserController@index');
+        }
         return view('admin.login');
     }
 
     public function postIndex(Request $request)
     {
-        $validate = \Validator::make($request->all(), [
+        $this->validate($request, [
             'name' => 'required',
             'password' => 'required',
         ]);
-        if ($validate->fails()) {
-            $errors = $validate->errors();
-            return redirect()->back()->withErrors($errors)->withInput();
-        }
 
         $result = \Auth::guard('admin')->attempt([
             'name' => $request->name,
@@ -36,7 +35,7 @@ class LoginController extends Controller
 
     public function out()
     {
-        \Auth::logout();
+        \Auth::guard('admin')->logout();
 
         return redirect()->action('Admin\LoginController@getIndex');
     }

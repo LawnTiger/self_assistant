@@ -19,11 +19,13 @@ Route::get('/home', function () {
 });
 
 // login and register
-Route::get('/login', 'Auth\LoginController@index')->name('login');
-Route::post('/login', 'Auth\LoginController@login');
-Route::get('/logout', 'Auth\LoginController@logout');
-Route::get('/register', 'Auth\RegisterController@index');
-Route::post('/register', 'Auth\RegisterController@register');
+Route::group(['namespace' => 'Auth'], function () {
+    Route::get('/login', 'LoginController@index')->name('user.login');
+    Route::post('/login', 'LoginController@login');
+    Route::get('/logout', 'LoginController@logout');
+    Route::get('/register', 'RegisterController@index');
+    Route::post('/register', 'RegisterController@register');
+});
 
 // user
 Route::group(['middleware' => 'auth'], function() {
@@ -38,4 +40,15 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::get('/chat', 'ChatController@getIndex');
     Route::resource('group', 'GroupController', ['only' => ['index', 'store', 'update', 'show']]);
+});
+
+// admin
+Route::group(['namespace' => 'Admin', 'prefix' => 'admin'], function () {
+    Route::get('login', 'LoginController@getIndex');
+    Route::post('login', 'LoginController@postIndex');
+    Route::get('out', 'LoginController@out');
+
+    Route::group(['middleware' => 'auth.admin'], function () {
+        Route::get('user', 'UserController@index');
+    });
 });

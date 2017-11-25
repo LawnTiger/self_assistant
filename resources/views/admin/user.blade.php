@@ -1,6 +1,6 @@
 @extends('admin.base')
 
-@section('title', '查看技术人员订单')
+@section('title', '用户列表')
 
 @section('content')
     <div class="card card-bordered style-primary">
@@ -10,7 +10,7 @@
                     <a href="{{ action('Admin\UserController@index') }}">返回上一级</a>
                 </button>
             </div>
-            <head>用户列表</head>
+            <header>用户列表</header>
         </div>
         <div class="card-body style-default-bright">
             <table class="table table-condensed table-hover">

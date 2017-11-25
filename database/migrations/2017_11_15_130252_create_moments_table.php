@@ -11,7 +11,7 @@ class CreateMomentsTable extends Migration
         Schema::create('moments', function (Blueprint $table) {
             $table->increments('id');
             $table->bigInteger('user_id');
-            $table->string('pictures');
+            $table->string('pictures')->nullable();
             $table->text('content');
             $table->timestamps();
         });

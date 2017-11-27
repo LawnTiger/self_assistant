@@ -15,10 +15,6 @@
 Route::post('/register', 'Api\RegisterController@index');
 Route::post('/login', 'Api\LoginController@index');
 
-// test
-Route::post('/register1', 'Api\RegisterController@index1');
-Route::post('/login1', 'Api\LoginController@index1');
-
 Route::group(['middleware' => ['auth:api'], 'namespace' => 'Api'], function () {
     Route::resource('friends', 'FriendController', ['only' => ['index', 'store', 'update', 'destroy']]);
     Route::resource('groups', 'GroupController', ['only' => ['index', 'show', 'store', 'update', 'destroy']]);

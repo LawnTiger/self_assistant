@@ -51,5 +51,6 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin'], function () {
     Route::group(['middleware' => 'auth.admin'], function () {
         Route::get('/', 'UserController@index');
         Route::get('user', 'UserController@index');
+        Route::get('moment', 'MomentController@index');
     });
 });

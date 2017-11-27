@@ -22,8 +22,6 @@ class MomentController extends Controller
             $mom->pictures = $request->pictures;
         }
         $mom->save();
-        $mom = $mom->toArray();
-        $mom['pictures'] = explode(',', $mom['pictures']);
 
         return app('jResponse')->success($mom);
     }

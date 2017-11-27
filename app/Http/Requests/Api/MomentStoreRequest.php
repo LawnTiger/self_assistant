@@ -7,7 +7,7 @@ class MomentStoreRequest extends ApiRequest
     public function rules()
     {
         return [
-            'contents' => 'required|max:255',
+            'contents' => 'required|max:1000',
             'pictures' => 'array',
         ];
     }

@@ -77,8 +77,8 @@
         </div>
         <div class="menubar-scroll-panel">
             <ul id="main-menu" class="gui-controls">
-                <li class="gui-folder">
-                    <a>
+                <li>
+                    <a href="{{ action('Admin\UserController@index') }}">
                         <div class="gui-icon"><i class="md md-account-child"></i></div>
                         <span class="title">用户管理</span>
                     </a>
@@ -95,14 +95,20 @@
                         </li>
                     </ul>--}}
                 </li>
-                <li class="gui-folder">
+                <li class="">
+                    <a href="{{ action('Admin\MomentController@index') }}">
+                        <div class="gui-icon"><i class="md md-list"></i></div>
+                        <span class="title">朋友圈管理</span>
+                    </a>
+                </li>
+                <li class="">
                     <a>
                         <div class="gui-icon"><i class="md md-list"></i></div>
                         <span class="title">笔记管理</span>
                     </a>
                 </li>
                 <li class="gui-folder">
-                    <a href="{{--{{ action('') }}--}}">
+                    <a href="">
                         <div class="gui-icon"><i class="md md-people"></i></div>
                         <span class="title">socket口管理</span>
                     </a>

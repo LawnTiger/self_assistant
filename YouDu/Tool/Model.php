@@ -1,6 +1,6 @@
 <?php
 
-namespace Youdu\Tool;
+namespace YouDu\Tool;
 
 class Model
 {

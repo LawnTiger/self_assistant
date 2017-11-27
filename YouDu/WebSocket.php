@@ -1,11 +1,11 @@
 <?php
 
-namespace Youdu;
+namespace YouDu;
 
 use Workerman\MySQL;
-use Youdu\Tool\Content;
-use Youdu\Tool\Model;
-use Youdu\Tool\Channel;
+use YouDu\Tool\Content;
+use YouDu\Tool\Model;
+use YouDu\Tool\Channel;
 
 class WebSocket
 {

@@ -19,6 +19,7 @@
                     <th>id</th>
                     <th>用户名</th>
                     <th>用户邮箱</th>
+                    <th>用户token</th>
                     <th>注册时间</th>
                 </tr>
                 </thead>
@@ -28,6 +29,7 @@
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
+                        <td>{{ $user->api_token }}</td>
                         <td>{{ $user->created_at }}</td>
                     </tr>
                 @endforeach

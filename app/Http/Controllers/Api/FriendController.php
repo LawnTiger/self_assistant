@@ -19,6 +19,7 @@ class FriendController extends Controller
         } else {
             return app('jResponse')->error('the status is invalid');
         }
+
         return app('jResponse')->success($list);
     }
 
@@ -45,6 +46,7 @@ class FriendController extends Controller
     public function update(FriendUpdateRequest $request, $id)
     {
         Friend::accept($request->user()->id, $id, $request->type);
+
         return app('jResponse')->success();
     }
 

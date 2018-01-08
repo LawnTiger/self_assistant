@@ -17,6 +17,7 @@ class LoginController extends Controller
             if ($match) {
                 $user->api_token = $token->genToken();
                 $user->save();
+
                 return app('jResponse')->success([
                     'id' => $user->id,
                     'name' => $user->name,

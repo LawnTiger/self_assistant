@@ -35,6 +35,7 @@ class UserController extends Controller
         $user = User::findOrFail(Auth::id());
         $user->name = $request->name;
         $user->save();
+
         return redirect('/');
     }
 }

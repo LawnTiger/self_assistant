@@ -14,6 +14,6 @@ class ApiRequest extends FormRequest
 
     public function response(array $errors)
     {
-        return new JsonResponse(['status' => '0', 'msg' => head(head($errors))], 422);
+        return new JsonResponse(['status' => '0', 'msg' => head(head($errors))], 200);
     }
 }
